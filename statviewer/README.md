@@ -6,4 +6,4 @@ The "frameitems.json" file in the addon folder can also be edited to customise w
 
 
 
-Bug: Addon loading error message not displayed in chat since it is loaded first.
+Bug: Addon loading error message not displayed in chat since this addon is loaded first.
