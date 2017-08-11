@@ -1,4 +1,6 @@
-This is a MODIFIED VERSION of Excrulon's statviewer addon
+https://github.com/acc97862/Tree-of-Savior-Addons/tree/master/addons/statviewer/addon_d.ipf/statviewer
+
+This is a modified version of Excrulon's statviewer addon
 
 To toggle the statviewer frame between visible and invisible, type "/statviewer" in chat
 For additional help, type "/statviewer help" in chat
