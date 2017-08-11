@@ -1,6 +1,8 @@
 Modified monsterframes originally by Excrulon for Tree of Savior patch 166969_001001.ipf
 
-Changes:
+
+Changes
+
 v1.0.0.4
 Creates settings file if it is not available
 
