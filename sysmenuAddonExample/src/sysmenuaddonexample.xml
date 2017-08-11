@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uiframe name="sysmenuaddonexample" x="0" y="0" width="470" height="609" create="open">
+	<draw drawnotitlebar="false" drawtitlebar="false"/>
+	<skin frameskin=""/>
+	<frame fullheight="true" fasthide="true" layout_gravity="left top" open="pip" margin="-470 0 0 0"/>
+	<input maxwidth="1280" moveable="false"/>
+	<layer layerlevel="80"/>
+	<option closebutton="false"/>
+	<sound opensound="inven_win_open" closesound="inven_win_close"/>
+	<script OpenScp="SYSMENUADDONEXAMPLE_OPEN" CloseScp="SYSMENUADDONEXAMPLE_CLOSE"/>
+	<controls>
+		<richtext name="title" rect="0 0 400 30" margin="0 18 0 0" layout_gravity="center top" caption="{@st43}SYSMENU Addon Example{/}"/>
+	</controls>
+</uiframe>
