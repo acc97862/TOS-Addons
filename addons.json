@@ -1,0 +1,15 @@
+  [
+	 {
+		 "Name" : "Inventory Weight" ,
+		 "File" : "inventoryweight" ,
+		 "Extension" : "ipf" ,
+		 "FileVersion" : "v1.0.0" ,
+		 "ReleaseTag" : "inventoryweight" ,
+		 "Unicode" : "⛄" ,
+		 "Description" : "Displays inventory weight" ,
+		 "Tags" : [
+			 "ui",
+       "inventory"
+		 ]
+	 }
+ ]
