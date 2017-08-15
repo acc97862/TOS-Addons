@@ -3,7 +3,9 @@ https://github.com/acc97862/Tree-of-Savior-Addons/tree/master/addons/monsterfram
 Modified monsterframes originally by Excrulon for Tree of Savior patch 166969_001001.ipf
 
 ---
-Changes
+Patch notes
+v1.0.0.5
+Patched addon no longer functioning if language is changed, but addon may require map change to recover
 
 v1.0.0.4
 Creates settings file if it is not available

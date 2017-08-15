@@ -1,12 +1,9 @@
 --inventoryweight.lua
 
-local loaded = false;
 local itemTbl = {};
 
 function INVENTORYWEIGHT_ON_INIT(addon, frame)
-	if not loaded then
-		loaded = true;
-
+	if INSERT_ITEM_TO_TREE_HOOKED ~= INSERT_ITEM_TO_TREE then
 		local function setupHook(newFunction, hookedFunctionStr)
 			local storeOldFunc = hookedFunctionStr .. "_OLD";
 			if _G[storeOldFunc] == nil then

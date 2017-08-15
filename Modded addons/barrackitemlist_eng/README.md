@@ -1,8 +1,6 @@
-https://github.com/acc97862/Tree-of-Savior-Addons/tree/master/addons/expcardcalculator/addon_d.ipf/expcardcalculator/src
+https://github.com/acc97862/myTosAddons/tree/master/barrackitemlist_eng
 
-Modified expcardcalculator by Excrulon for Tree of Savior patch 166969_001001.ipf
-
-Menu icon found by Fam.Fan.Fan
+Modified barrackitemlist_eng by writ312 for iToS patch 166969_001001.ipf
 
 
 Likely bug:
@@ -10,5 +8,5 @@ Addon icon may disappear for 1 map when the game adds in a new icon in the middl
 
 
 Patch notes
-v1.1.0.3
+v1.0.0.2
 Patched icon disappearing if language is changed, but addon requires map change to recover

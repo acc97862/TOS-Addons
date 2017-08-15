@@ -1,6 +1,3 @@
---monsterframes.lua
-
-local loaded = false;
 local settings = {
 	showRaceType = false;
 	showAttribute = true;
@@ -13,7 +10,7 @@ local settings = {
 };
 
 function MONSTERFRAMES_ON_INIT(addon, frame)
-	if not loaded then
+	if not TGTINFO_TARGET_SET_HOOKED ~= TGTINFO_TARGET_SET then
 		local acutil = require('acutil');
 		acutil.setupHook(TGTINFO_TARGET_SET_HOOKED, "TGTINFO_TARGET_SET");
 		acutil.setupHook(TARGETINFO_ON_MSG_HOOKED, "TARGETINFO_ON_MSG");
@@ -25,7 +22,6 @@ function MONSTERFRAMES_ON_INIT(addon, frame)
 		else
 			settings = t;
 		end
-		loaded = true;
 	end
 end
 
@@ -46,7 +42,7 @@ function TGTINFO_TARGET_SET_HOOKED(frame, msg, argStr, argNum)
 	if argStr == "None" then
 		return;
 	end
-	
+
 	local mypclevel = GETMYPCLEVEL();
 	local levelcolor = ""
 	local targetHandle = session.GetTargetHandle();
@@ -54,15 +50,15 @@ function TGTINFO_TARGET_SET_HOOKED(frame, msg, argStr, argNum)
 	if nil == targetinfo then
 		return;
 	end
-    if targetinfo.TargetWindow == 0 then
+	if targetinfo.TargetWindow == 0 then
 		return;
 	end
 	if targetinfo.isBoss == 1 then
 		return;
 	end
 
-    -- birth buff
-    local birth_buff_skin, birth_buff_img = TARGETINFO_GET_BIRTH_SKIN_ANG_IMG(frame, targetinfo, targetHandle);
+	-- birth buff
+	local birth_buff_skin, birth_buff_img = TARGETINFO_GET_BIRTH_SKIN_ANG_IMG(frame, targetinfo, targetHandle);
 	local birthBuffImgName = GET_BIRTH_BUFF_IMG_NAME(targetHandle);
 	if birthBuffImgName == "None" then
 		birth_buff_skin:ShowWindow(0)
@@ -78,14 +74,14 @@ function TGTINFO_TARGET_SET_HOOKED(frame, msg, argStr, argNum)
 	elseif mypclevel + 5 < targetinfo.level then
 		levelcolor = frame:GetUserConfig("MON_NAME_COLOR_MORE_THAN_5");
 	end
-	
-    -- gauge    
+
+	-- gauge
 	local hpGauge = TARGETINFO_GET_HP_GAUGE(frame, targetinfo, targetHandle);
 	frame:SetValue(session.GetTargetHandle());
 
 	local stat = targetinfo.stat;
 
-	if stat.HP ~= hpGauge:GetCurPoint() or stat.maxHP ~= hpGauge:GetMaxPoint() then    
+	if stat.HP ~= hpGauge:GetCurPoint() or stat.maxHP ~= hpGauge:GetMaxPoint() then
 		hpGauge:SetPoint(stat.HP, stat.maxHP);
 		hpGauge:StopTimeProcess();
 	else
@@ -100,7 +96,7 @@ function TGTINFO_TARGET_SET_HOOKED(frame, msg, argStr, argNum)
 			hpGauge:SetColorTone("FFFFFFFF");
 		end
 	end
-    local hpText = frame:GetChild('hpText');
+	local hpText = frame:GetChild('hpText');
 
 	-- Edits made here
 	if settings.showMaxHp then
@@ -109,33 +105,33 @@ function TGTINFO_TARGET_SET_HOOKED(frame, msg, argStr, argNum)
 		hpText:SetText(GET_COMMAED_STRING(stat.HP));
 	end
 
-    -- name	
+	-- name
 	local targetSize = targetinfo.size;
 	local eliteBuffMob = "";
-	if targetSize ~= nil then		
+	if targetSize ~= nil then
 		if targetinfo.isEliteBuff == 1 then
 			eliteBuffMob = ClMsg("TargetNameElite") .. " ";
-		end		
+		end
 	end
-    local nametext = GET_CHILD_RECURSIVELY(frame, "name", "ui::CRichText");
+	local nametext = GET_CHILD_RECURSIVELY(frame, "name", "ui::CRichText");
 	local mypclevel = GETMYPCLEVEL();
-    local levelColor = "";
-    if mypclevel + 10 < targetinfo.level then
-        nametext:SetTextByKey('color', frame:GetUserConfig("MON_NAME_COLOR_MORE_THAN_10"));
+	local levelColor = "";
+	if mypclevel + 10 < targetinfo.level then
+		nametext:SetTextByKey('color', frame:GetUserConfig("MON_NAME_COLOR_MORE_THAN_10"));
 	elseif mypclevel + 5 < targetinfo.level then
-        nametext:SetTextByKey('color', frame:GetUserConfig("MON_NAME_COLOR_MORE_THAN_5"));
-    else
-        nametext:SetTextByKey('color', frame:GetUserConfig("MON_NAME_COLOR_DEFAULT"));
+		nametext:SetTextByKey('color', frame:GetUserConfig("MON_NAME_COLOR_MORE_THAN_5"));
+	else
+		nametext:SetTextByKey('color', frame:GetUserConfig("MON_NAME_COLOR_DEFAULT"));
 	end
-    nametext:SetTextByKey('lv', targetinfo.level);
-    nametext:SetTextByKey('name', eliteBuffMob..targetinfo.name);
-		
+	nametext:SetTextByKey('lv', targetinfo.level);
+	nametext:SetTextByKey('name', eliteBuffMob..targetinfo.name);
+
 	-- race
-    local monsterRaceSet = TARGETINFO_GET_RACE_CONTROL(frame, targetinfo, targetHandle);
-    local racePic = monsterRaceSet:GetChild('racePic');
-    local raceImg = TARGETINFO_GET_RACE_TYPE_IMAGE(monsterRaceSet, targetinfo.raceType);
-    racePic = tolua.cast(racePic, 'ui::CPicture');
-    racePic:SetImage(raceImg);	
+	local monsterRaceSet = TARGETINFO_GET_RACE_CONTROL(frame, targetinfo, targetHandle);
+	local racePic = monsterRaceSet:GetChild('racePic');
+	local raceImg = TARGETINFO_GET_RACE_TYPE_IMAGE(monsterRaceSet, targetinfo.raceType);
+	racePic = tolua.cast(racePic, 'ui::CPicture');
+	racePic:SetImage(raceImg);
 
 	if ui.IsFrameVisible("targetinfotoboss") == 1 then
 		frame:MoveFrame(TARGET_INFO_OFFSET_BOSS_X, TARGET_INFO_OFFSET_Y);
@@ -143,7 +139,7 @@ function TGTINFO_TARGET_SET_HOOKED(frame, msg, argStr, argNum)
 		frame:MoveFrame(TARGET_INFO_OFFSET_X, TARGET_INFO_OFFSET_Y);
 	end
 	frame:ShowWindow(1);
-	frame:Invalidate();	
+	frame:Invalidate();
 
 
 	-- Edited monsterframes code here
@@ -234,7 +230,7 @@ function TARGETINFO_ON_MSG_HOOKED(frame, msg, argStr, argNum)
 			return;
 		end
 
-        local targetHandle = session.GetTargetHandle();
+		local targetHandle = session.GetTargetHandle();
 		local targetinfo = info.GetTargetInfo(targetHandle);
 		local hpGauge = TARGETINFO_GET_HP_GAUGE(frame, targetinfo, targetHandle);
 		local beforeHP = hpGauge:GetCurPoint();
@@ -245,7 +241,7 @@ function TARGETINFO_ON_MSG_HOOKED(frame, msg, argStr, argNum)
 			end
 		end
 		hpGauge:SetMaxPointWithTime(stat.HP, stat.maxHP, 0.2, 0.4);
-        local hpText = frame:GetChild('hpText');
+		local hpText = frame:GetChild('hpText');
 
 		--Edits made here
 		if settings.showMaxHp then
@@ -261,14 +257,14 @@ function TARGETINFOTOBOSS_TARGET_SET_HOOKED(frame, msg, argStr, argNum)
 	if argStr == "None" or argNum == nil then
 		return;
 	end
-	
+
 	local targetinfo = info.GetTargetInfo(argNum);
 	if targetinfo == nil then
 		session.ResetTargetBossHandle();
 		frame:ShowWindow(0);
 		return;
 	end
-	
+
 	if 0 == targetinfo.TargetWindow or targetinfo.isBoss == 0 then
 		session.ResetTargetBossHandle();
 		frame:ShowWindow(0);
@@ -291,28 +287,28 @@ function TARGETINFOTOBOSS_TARGET_SET_HOOKED(frame, msg, argStr, argNum)
 	-- name
 	local nametext = GET_CHILD_RECURSIVELY(frame, "name", "ui::CRichText");
 	local mypclevel = GETMYPCLEVEL();
-    local levelColor = "";
-    if mypclevel + 10 < targetinfo.level then
-        nametext:SetTextByKey('color', frame:GetUserConfig("MON_NAME_COLOR_MORE_THAN_10"));
+	local levelColor = "";
+	if mypclevel + 10 < targetinfo.level then
+		nametext:SetTextByKey('color', frame:GetUserConfig("MON_NAME_COLOR_MORE_THAN_10"));
 	elseif mypclevel + 5 < targetinfo.level then
-        nametext:SetTextByKey('color', frame:GetUserConfig("MON_NAME_COLOR_MORE_THAN_5"));
-    else
-        nametext:SetTextByKey('color', frame:GetUserConfig("MON_NAME_COLOR_DEFAULT"));
+		nametext:SetTextByKey('color', frame:GetUserConfig("MON_NAME_COLOR_MORE_THAN_5"));
+	else
+		nametext:SetTextByKey('color', frame:GetUserConfig("MON_NAME_COLOR_DEFAULT"));
 	end
-    nametext:SetTextByKey('lv', targetinfo.level);
-    nametext:SetTextByKey('name', targetinfo.name);
-	
+	nametext:SetTextByKey('lv', targetinfo.level);
+	nametext:SetTextByKey('name', targetinfo.name);
+
 	-- race
-	local raceTypeSet = GET_CHILD(frame, "race");    
-    local image = raceTypeSet:GetChild('racePic');    
-    local imageStr = TARGETINFO_GET_RACE_TYPE_IMAGE(raceTypeSet, targetinfo.raceType);
-    image = tolua.cast(image, 'ui::CPicture');    
-    image:SetImage(imageStr);
+	local raceTypeSet = GET_CHILD(frame, "race");
+	local image = raceTypeSet:GetChild('racePic');
+	local imageStr = TARGETINFO_GET_RACE_TYPE_IMAGE(raceTypeSet, targetinfo.raceType);
+	image = tolua.cast(image, 'ui::CPicture');
+	image:SetImage(imageStr);
 
 	-- hp
 	local stat = targetinfo.stat;
 	local hpGauge = GET_CHILD(frame, "hp", "ui::CGauge");
-    local hpText = frame:GetChild('hpText');
+	local hpText = frame:GetChild('hpText');
 	hpGauge:SetPoint(stat.HP, stat.maxHP);
 
 	-- Edits made here
@@ -392,21 +388,21 @@ function TARGETINFOTOBOSS_ON_MSG_HOOKED(frame, msg, argStr, argNum)
 		frame:SetVisible(0); -- visible값이 1이면 다른 몬스터 hp gauge offset이 옆으로 밀림.(targetinfo.lua 참조)
 		frame:ShowWindow(0);
 	end
-	
+
 	if msg == 'TARGET_UPDATE' or msg == 'TARGET_BUFF_UPDATE' then
 		local target = session.GetTargetBossHandle();
 		if target ~= 0 then
-			if session.IsBoss( target ) == true then				
+			if session.IsBoss( target ) == true then
 				TARGETINFOTOBOSS_TARGET_SET(frame, 'TARGET_SET_BOSS', "Enemy", target)
 			end
 		end
-		
-		local stat = info.GetStat(session.GetTargetBossHandle());	
+
+		local stat = info.GetStat(session.GetTargetBossHandle());
 		if stat ~= nil then
 			local hpGauge = GET_CHILD(frame, "hp", "ui::CGauge");
 			hpGauge:SetPoint(stat.HP, stat.maxHP);
 
-            local hpText = frame:GetChild('hpText');
+			local hpText = frame:GetChild('hpText');
 
 			-- Edits made here
 			if settings.showMaxHp then

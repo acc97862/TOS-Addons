@@ -2,7 +2,6 @@ _G['ADDONS'] = _G['ADDONS'] or {};
 _G['ADDONS']['BARRACKITEMLIST'] = _G['ADDONS']['BARRACKITEMLIST'] or {};
 local acutil = require('acutil')
 local g = _G['ADDONS']['BARRACKITEMLIST']
-local PREVIOUS_SYSMENU_CREATE_ICON;
 g.settingPath = '../addons/barrackitemlist/'
 g.userlist  = acutil.loadJSON(g.settingPath..'userlist.json',nil) or {}
 g.warehouseList = acutil.loadJSON(g.settingPath..'warehouse.json',nil) or {}
@@ -70,11 +69,7 @@ function BARRACKITEMLIST_ON_INIT(addon,frame)
     acutil.setupEvent(addon,'WAREHOUSE_CLOSE','BARRACKITEMLIST_SAVE_WAREHOUSE')
     -- acutil.setupEvent(addon, 'SELECT_CHARBTN_LBTNUP', 'SELECT_CHARBTN_LBTNUP_EVENT')
 
-	if PREVIOUS_SYSMENU_CREATE_ICON == nil then
-		PREVIOUS_SYSMENU_CREATE_ICON = SYSMENU_CHECK_HIDE_VAR_ICONS;
-		acutil.setupHook(BARRACKITEMLIST_SYSMENU_CHECK_HIDE_VAR_ICONS_HOOKED, "SYSMENU_CHECK_HIDE_VAR_ICONS");
-		SYSMENU_CHECK_HIDE_VAR_ICONS(ui.GetFrame("sysmenu"));
-	end
+    addon:RegisterMsg('GAME_START_3SEC','BARRACKITEMLIST_CREATE_VAR_ICONS')
     
     local droplist = tolua.cast(frame:GetChild("droplist"), "ui::CDropList");
     droplist:ClearItems()
@@ -434,32 +429,27 @@ function BARRACKITEMLIST_SAVE_SETTINGMENU()
     acutil.saveJSON(g.settingPath..'setting.json',g.setting)
 end
 
-function BARRACKITEMLIST_SYSMENU_CHECK_HIDE_VAR_ICONS_HOOKED(frame, isAddon)
-	if not isAddon then
-		if false == VARICON_VISIBLE_STATE_CHANTED(frame, "necronomicon", "necronomicon")
-		and false == VARICON_VISIBLE_STATE_CHANTED(frame, "grimoire", "grimoire")
-		and false == VARICON_VISIBLE_STATE_CHANTED(frame, "guild", "guild")
-		and false == VARICON_VISIBLE_STATE_CHANTED(frame, "poisonpot", "poisonpot")
-		then
-			return;
-		end
+function BARRACKITEMLIST_CREATE_VAR_ICONS()
+    local frame = ui.GetFrame("sysmenu");
+	if false == VARICON_VISIBLE_STATE_CHANTED(frame, "necronomicon", "necronomicon")
+	and false == VARICON_VISIBLE_STATE_CHANTED(frame, "grimoire", "grimoire")
+	and false == VARICON_VISIBLE_STATE_CHANTED(frame, "guild", "guild")
+	and false == VARICON_VISIBLE_STATE_CHANTED(frame, "poisonpot", "poisonpot")
+	then
+		return;
 	end
 
-	local extraBag, rightMargin, offsetX = PREVIOUS_SYSMENU_CREATE_ICON(frame, true);
-
-	if extraBag == nil or rightMargin == nil or offsetX == nil then
-		extraBag = frame:GetChild('extraBag');
-		status = frame:GetChild("status");
-		offsetX = status:GetX() - extraBag:GetX();
-		rightMargin = 0;
-		for idx = 0, frame:GetChildCount()-1 do
-			local t = frame:GetChildByIndex(idx):GetMargin().right;
-			if rightMargin < t then
-				rightMargin = t;
-			end
+	local extraBag = frame:GetChild('extraBag');
+	local status = frame:GetChild("status");
+	local offsetX = status:GetX() - extraBag:GetX();
+	local rightMargin = 0;
+	for idx = 0, frame:GetChildCount()-1 do
+		local t = frame:GetChildByIndex(idx):GetMargin().right;
+		if rightMargin < t then
+			rightMargin = t;
 		end
-		rightMargin = rightMargin + offsetX;
 	end
+	rightMargin = rightMargin + offsetX;
 
 	rightMargin = SYSMENU_CREATE_VARICON(frame, status, "barrackitemlist", "barrackitemlist", "sysmenu_inv", rightMargin, offsetX, "barrack item list");
 
@@ -467,6 +457,4 @@ function BARRACKITEMLIST_SYSMENU_CHECK_HIDE_VAR_ICONS_HOOKED(frame, isAddon)
 	if barrackitemlistButton ~= nil then
 		barrackitemlistButton:SetTextTooltip("{@st59}barrackitemlist");
 	end
-
-	return extraBag, rightMargin, offsetX
 end

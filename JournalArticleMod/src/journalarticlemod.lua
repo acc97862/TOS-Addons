@@ -1,8 +1,6 @@
--- journalarticlemod.lua
+--journalarticlemod.lua
 
-local loaded = false;
 local MAX_LINES_PER_PAGE = 200;
-local acutil = require("acutil");
 local curviewing;
 local curpage;
 local viewtype;
@@ -10,18 +8,27 @@ local viewpage;
 local article_tbl = {quest = {}, npc = {}, collection = {}, achieve = {}, mission = {}};
 
 function JOURNALARTICLEMOD_ON_INIT(addon, frame)
-	if not loaded then
-		acutil.setupHook(CREATE_JOURNAL_ARTICLE_CONTENTS_HOOKED, "CREATE_JOURNAL_ARTICLE_CONTENTS");
-		acutil.setupHook(JOURNAL_CONTENTS_QUEST_HOOKED, "JOURNAL_CONTENTS_QUEST");
-		acutil.setupHook(JOURNAL_CONTENTS_NPC_HOOKED, "JOURNAL_CONTENTS_NPC");
-		acutil.setupHook(JOURNAL_CONTENTS_COLLECTION_HOOKED, "JOURNAL_CONTENTS_COLLECTION");
-		acutil.setupHook(JOURNAL_CONTENTS_ACHIEVE_HOOKED, "JOURNAL_CONTENTS_ACHIEVE");
-		acutil.setupHook(JOURNAL_CONTENTS_MGAME_HOOKED, "JOURNAL_CONTENTS_MGAME");
-		loaded = true;
+	if CREATE_JOURNAL_ARTICLE_CONTENTS_HOOKED ~= CREATE_JOURNAL_ARTICLE_CONTENTS then
+		local function setupHook(newFunction, hookedFunctionStr)
+			local storeOldFunc = hookedFunctionStr .. "_OLD";
+			if _G[storeOldFunc] == nil then
+				_G[storeOldFunc] = _G[hookedFunctionStr];
+				_G[hookedFunctionStr] = newFunction;
+			else
+				_G[hookedFunctionStr] = newFunction;
+			end
+		end
+
+		setupHook(CREATE_JOURNAL_ARTICLE_CONTENTS_HOOKED, "CREATE_JOURNAL_ARTICLE_CONTENTS");
+		setupHook(JOURNAL_CONTENTS_QUEST_HOOKED, "JOURNAL_CONTENTS_QUEST");
+		setupHook(JOURNAL_CONTENTS_NPC_HOOKED, "JOURNAL_CONTENTS_NPC");
+		setupHook(JOURNAL_CONTENTS_COLLECTION_HOOKED, "JOURNAL_CONTENTS_COLLECTION");
+		setupHook(JOURNAL_CONTENTS_ACHIEVE_HOOKED, "JOURNAL_CONTENTS_ACHIEVE");
+		setupHook(JOURNAL_CONTENTS_MGAME_HOOKED, "JOURNAL_CONTENTS_MGAME");
 	end
 end
 
-function JOURNALARTICLEMOD_CREATE_OBJECTS(frame, queue)
+local function JOURNALARTICLEMOD_CREATE_OBJECTS(frame, queue)
 	local groupbox = queue:CreateOrGetControl('groupbox', 'groupbox', 0, 0, 550, 40);
 	groupbox:SetSkinName("");
 
@@ -170,9 +177,10 @@ function JOURNAL_CONTENTS_QUEST_HOOKED(frame, group)
 	table.sort(keytbl);
 	article_tbl["quest"]["text"] = {};
 
-	for _, k in pairs(keytbl) do
-		for _, v in pairs(tbl[k]) do
-			table.insert(article_tbl["quest"]["text"], {k = k, v = v});
+	for t1 = 1, #keytbl do
+		local k = keytbl[t1];
+		for t2 = 1, #tbl[k] do
+			table.insert(article_tbl["quest"]["text"], {k = k, v = tbl[k][t2]});
 		end
 	end
 
@@ -242,9 +250,10 @@ function JOURNAL_CONTENTS_NPC_HOOKED(frame, group)
 	table.sort(keytbl);
 	article_tbl["npc"]["text"] = {};
 
-	for _, k in pairs(keytbl) do
-		for _, v in pairs(tbl[k]) do
-			table.insert(article_tbl["npc"]["text"], {k = k, v = v});
+	for t1 = 1, #keytbl do
+		local k = keytbl[t1];
+		for t2 = 1, #tbl[k] do
+			table.insert(article_tbl["npc"]["text"], {k = k, v = tbl[k][t2]});
 		end
 	end
 

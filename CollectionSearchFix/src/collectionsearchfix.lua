@@ -1,5 +1,4 @@
 ﻿--collectionsearchfix.lua
-local loaded = false;
 
 REMOVE_ITEM_SKILL = 7
 
@@ -35,25 +34,24 @@ local collectionViewCount = {
 	showIncompleteCollections = 0
 };
 
-function COLLECTIONSEARCHFIX_HOOKER(newFunction, hookedFunctionStr)
-	local storeOldFunc = hookedFunctionStr .. "_OLD";
-	if _G[storeOldFunc] == nil then
-		_G[storeOldFunc] = _G[hookedFunctionStr];
-		_G[hookedFunctionStr] = newFunction;
-	else
-		_G[hookedFunctionStr] = newFunction;
-	end
-end
-
 function COLLECTIONSEARCHFIX_ON_INIT(addon, frame)
-	if not loaded then
-		COLLECTIONSEARCHFIX_HOOKER(COLLECTION_TYPE_CHANGE_HOOKED, "COLLECTION_TYPE_CHANGE");
-		COLLECTIONSEARCHFIX_HOOKER(UPDATE_COLLECTION_LIST_HOOKED, "UPDATE_COLLECTION_LIST");
-		COLLECTIONSEARCHFIX_HOOKER(CHECK_COLLECTION_INFO_FILTER_HOOKED, "CHECK_COLLECTION_INFO_FILTER");
-		COLLECTIONSEARCHFIX_HOOKER(UPDATE_COLLECTION_OPTION_HOOKED, "UPDATE_COLLECTION_OPTION");
-		COLLECTIONSEARCHFIX_HOOKER(GET_COLLECTION_INFO_HOOKED, "GET_COLLECTION_INFO");
-		COLLECTIONSEARCHFIX_HOOKER(VIEW_COLLECTION_ALL_STATUS_HOOKED, "VIEW_COLLECTION_ALL_STATUS");
-		loaded = true;
+	if COLLECTION_TYPE_CHANGE_HOOKED ~= COLLECTION_TYPE_CHANGE then
+		local function setupHook(newFunction, hookedFunctionStr)
+			local storeOldFunc = hookedFunctionStr .. "_OLD";
+			if _G[storeOldFunc] == nil then
+				_G[storeOldFunc] = _G[hookedFunctionStr];
+				_G[hookedFunctionStr] = newFunction;
+			else
+				_G[hookedFunctionStr] = newFunction;
+			end
+		end
+
+		setupHook(COLLECTION_TYPE_CHANGE_HOOKED, "COLLECTION_TYPE_CHANGE");
+		setupHook(UPDATE_COLLECTION_LIST_HOOKED, "UPDATE_COLLECTION_LIST");
+		setupHook(CHECK_COLLECTION_INFO_FILTER_HOOKED, "CHECK_COLLECTION_INFO_FILTER");
+		setupHook(UPDATE_COLLECTION_OPTION_HOOKED, "UPDATE_COLLECTION_OPTION");
+		setupHook(GET_COLLECTION_INFO_HOOKED, "GET_COLLECTION_INFO");
+		setupHook(VIEW_COLLECTION_ALL_STATUS_HOOKED, "VIEW_COLLECTION_ALL_STATUS");
 	end
 end
 

@@ -1,3 +1,5 @@
+--questdumper.lua
+
 local loaded = false;
 
 function QUESTDUMPER_ON_INIT(addon, frame)
@@ -15,26 +17,33 @@ end
 
 function QUESTDUMPER_DUMP()
 	local tbl = {};
-	local txt = string.format("Questlog of %s %s on %s\n", GETMYPCNAME(), GETMYFAMILYNAME(), os.date("%b %d %Y %X"))
+	local lvltbl = {};
+	local txt = string.format("Questlog of %s %s on %s\n", GETMYPCNAME(), GETMYFAMILYNAME(), os.date("%b %d %Y %X"));
 	local sObj = GET_MAIN_SOBJ();
 
 	for i = 0, geQuestTable.GetQuestPropertyCount()-1 do
 		if sObj[geQuestTable.GetQuestProperty(i)] == 300 then
 			questCls = GetIES(geQuestTable.GetQuestObject(i));
-			if not tbl[questCls.Level] then
-				tbl[questCls.Level] = {}
+			local lvl = questCls.Level;
+			if tbl[lvl] == nil then
+				tbl[lvl] = {};
+				table.insert(lvltbl, lvl);
 			end
-			table.insert(tbl[questCls.Level], dictionary.ReplaceDicIDInCompStr(questCls.Name))
+			table.insert(tbl[lvl], dictionary.ReplaceDicIDInCompStr(questCls.Name));
 		end
 	end
 
-	for k, t in pairs(tbl) do
-		for _, v in pairs(t) do
-			txt = txt .. "\n" .. k .. "\t" .. v
+	table.sort(lvltbl);
+
+	for t1 = 1, #lvltbl do
+		local lvl = lvltbl[t1];
+		for t2 = 1, #tbl[lvl] do
+			txt = txt .. "\n" .. lvl .. "\t" .. tbl[lvl][t2];
 		end
 	end
 
-	local file = io.open("../addons/questdumper/questlog.txt", "w")
-	file:write(txt)
-	file:close()
+	local file = io.open("../addons/questdumper/questlog.txt", "w");
+	file:write(txt);
+	file:flush();
+	file:close();
 end

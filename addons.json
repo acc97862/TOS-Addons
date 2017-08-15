@@ -1,53 +1,53 @@
-[
+﻿[
 	{
-		"Name" : "Inventory Weight" ,
-		"File" : "inventoryweight" ,
-		"Extension" : "ipf" ,
-		"FileVersion" : "v1.0.0" ,
-		"ReleaseTag" : "inventoryweight" ,
-		"Unicode" : "⛄" ,
-		"Description" : "Displays inventory weight" ,
+		"Name" : "Inventory Weight",
+		"File" : "inventoryweight",
+		"Extension" : "ipf",
+		"FileVersion" : "v1.0.1",
+		"ReleaseTag" : "inventoryweight",
+		"Unicode" : "⛄",
+		"Description" : "Displays inventory weight",
 		"Tags" : [
-		        "ui",
-		        "inventory"
+			"ui",
+			"inventory"
 		]
 	},
 	{
-		"Name" : "Collection Search Fix" ,
-		"File" : "collectionsearchfix" ,
-		"Extension" : "ipf" ,
-		"FileVersion" : "v1.0.0" ,
-		"ReleaseTag" : "collectionsearchfix" ,
-		"Unicode" : "⛄" ,
-		"Description" : "Fixes collection frame search function" ,
+		"Name" : "Collection Search Fix",
+		"File" : "collectionsearchfix",
+		"Extension" : "ipf",
+		"FileVersion" : "v1.0.1",
+		"ReleaseTag" : "collectionsearchfix",
+		"Unicode" : "⛄",
+		"Description" : "Fixes collection frame search function",
 		"Tags" : [
-		        "ui",
-		        "collection"
+			"ui",
+			"collection"
 		]
 	},
 	{
-		"Name" : "Journal Article Mod" ,
-		"File" : "journalarticlemod" ,
-		"Extension" : "ipf" ,
-		"FileVersion" : "v1.0.0" ,
-		"ReleaseTag" : "journalarticlemod" ,
-		"Unicode" : "⛄" ,
-		"Description" : "Displays inventory weight" ,
+		"Name" : "Journal Article Mod",
+		"File" : "journalarticlemod",
+		"Extension" : "ipf",
+		"FileVersion" : "v1.0.1",
+		"ReleaseTag" : "journalarticlemod",
+		"Unicode" : "⛄",
+		"Description" : "Displays inventory weight",
 		"Tags" : [
-		        "ui",
-		        "journal"
+			"ui",
+			"journal"
 		]
 	},
 	{
-		"Name" : "Remove Event Button" ,
-		"File" : "removeeventbutton" ,
-		"Extension" : "ipf" ,
-		"FileVersion" : "v1.0.0" ,
-		"ReleaseTag" : "removeeventbutton" ,
-		"Unicode" : "⛄" ,
-		"Description" : "Removes event button" ,
+		"Name" : "Remove Event Button",
+		"File" : "removeeventbutton",
+		"Extension" : "ipf",
+		"FileVersion" : "v1.0.1",
+		"ReleaseTag" : "removeeventbutton",
+		"Unicode" : "⛄",
+		"Description" : "Removes event button",
 		"Tags" : [
-		        "ui"
+			"ui"
 		]
 	}
 ]
