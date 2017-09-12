@@ -11,4 +11,4 @@ Addon icon may disappear for 1 map when the game adds in a new icon in the middl
 
 Patch notes
 v1.1.0.3
-Patched icon disappearing if language is changed, but addon requires map change to recover
+Addon may require map change to recover when game language is changed

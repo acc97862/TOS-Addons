@@ -4,4 +4,4 @@ Addon based on inventory.lua from patch 166969.ipf of iToS
 
 Patch notes
 v1.0.1
-Patched addon no longer functioning if language is changed, but addon may require map change to recover
+Addon may require map change to recover when game language is changed

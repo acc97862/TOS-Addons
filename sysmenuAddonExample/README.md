@@ -7,7 +7,7 @@ Addon icon may disappear for 1 map when the game adds in a new icon in the middl
 
 Patch notes
 v1.0.1
-Patched icon disappearing if language is changed, but addon requires map change to recover
+Addon may require map change to recover when game language is changed
 
 
 A better method of making the addon icon is for all addons to agree to use 1 common function hook to create a sysmenu icon, but this is unlikely to happen
