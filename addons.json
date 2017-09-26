@@ -26,19 +26,6 @@
 		]
 	},
 	{
-		"Name" : "Journal Article Mod",
-		"File" : "journalarticlemod",
-		"Extension" : "ipf",
-		"FileVersion" : "v1.0.1",
-		"ReleaseTag" : "journalarticlemod",
-		"Unicode" : "⛄",
-		"Description" : "Displays inventory weight",
-		"Tags" : [
-			"ui",
-			"journal"
-		]
-	},
-	{
 		"Name" : "Remove Event Button",
 		"File" : "removeeventbutton",
 		"Extension" : "ipf",
