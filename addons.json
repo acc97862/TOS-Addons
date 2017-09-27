@@ -36,5 +36,18 @@
 		"Tags" : [
 			"ui"
 		]
+	},
+	{
+		"Name" : "JournalMod",
+		"File" : "journalmod",
+		"Extension" : "ipf",
+		"FileVersion" : "v1.0.0",
+		"ReleaseTag" : "journalmod",
+		"Unicode" : "⛄",
+		"Description" : "Minor journal changes",
+		"Tags" : [
+			"ui",
+			"journal"
+		]
 	}
 ]
