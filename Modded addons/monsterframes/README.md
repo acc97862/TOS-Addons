@@ -1,9 +1,12 @@
 https://github.com/acc97862/Tree-of-Savior-Addons/tree/master/addons/monsterframes/addon_d.ipf/monsterframes
 
-Modified monsterframes originally by Excrulon for Tree of Savior patch 166969_001001.ipf
+Modified monsterframes originally by Excrulon for Tree of Savior patch 174038_001001.ipf
 
 ---
 Patch notes
+v1.0.0.6
+Updates journal kill count every minute
+
 v1.0.0.5
 Addon may require map change to recover when game language is changed
 

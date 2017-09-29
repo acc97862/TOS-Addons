@@ -197,23 +197,19 @@ function TGTINFO_TARGET_SET_HOOKED(frame, msg, argStr, argNum)
 		end
 	end
 
+	mytempvar = montype;
+	mytempvar2 = settings.showKillCount;
 	if settings.showKillCount then
-		local wiki = GetWikiByName(monCls.Journal);
-
-		if wiki ~= nil then
-			local killCount = GetWikiIntProp(wiki, "KillCount");
-			local jIES = GetClass('Journal_monkill_reward', monCls.Journal);
-
-			local killCountText = frame:CreateOrGetControl("richtext", "killCountText", 0, 0, 100, 40);
-			tolua.cast(killCountText, "ui::CRichText");
-			if targetinfo.size ~= nil and jIES ~= nil then
-				killCountText:SetOffset(killxPosition, 0);
-				killCountText:SetFontName("white_16_ol");
-				killCountText:SetText(GetCommaedText(killCount) .. " / " .. GetCommaedText(jIES.Count1));
-				killCountText:ShowWindow(1);
-			else
-				killCountText:ShowWindow(0);
-			end
+		local monKillCount = GetMonKillCount(pc, montype);
+		local curLv, curPoint, curMaxPoint = GET_ADVENTURE_BOOK_MONSTER_KILL_COUNT_INFO(monCls.MonRank == 'Boss', monKillCount);
+		local killCountText = frame:CreateOrGetControl("richtext", "killCountText", 0, 0, 100, 40);
+		if targetinfo.size ~= nil then
+			killCountText:SetOffset(killxPosition, 0);
+			killCountText:SetFontName("white_16_ol");
+			killCountText:SetText(string.format("%d: %d/%d", curLv, curPoint, curMaxPoint));
+			killCountText:ShowWindow(1);
+		else
+			killCountText:ShowWindow(0);
 		end
 	end
 end
@@ -343,6 +339,8 @@ function TARGETINFOTOBOSS_TARGET_SET_HOOKED(frame, msg, argStr, argNum)
 
 	local xPosition = 100;
 	local yPosition = 25;
+	local killxPosition = 35;
+	local killyPosition = 5;
 	local propertyWidth = 35;
 	local positionIndex = 0;
 
@@ -377,6 +375,21 @@ function TARGETINFOTOBOSS_TARGET_SET_HOOKED(frame, msg, argStr, argNum)
 			positionIndex = positionIndex + 1;
 		else
 			targetSizeText:ShowWindow(0);
+		end
+	end
+
+	if settings.showKillCount then
+		mytempvar = montype;
+		local monKillCount = GetMonKillCount(pc, montype);
+		local curLv, curPoint, curMaxPoint = GET_ADVENTURE_BOOK_MONSTER_KILL_COUNT_INFO(monCls.MonRank == 'Boss', monKillCount);
+		local killCountText = frame:CreateOrGetControl("richtext", "killCountText", 0, 0, 100, 40);
+		if targetinfo.size ~= nil then
+			killCountText:SetOffset(killxPosition, killyPosition);
+			killCountText:SetFontName("white_16_ol");
+			killCountText:SetText(string.format("%d: %d/%d", curLv, curPoint, curMaxPoint));
+			killCountText:ShowWindow(1);
+		else
+			killCountText:ShowWindow(0);
 		end
 	end
 end
