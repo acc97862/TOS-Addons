@@ -1088,6 +1088,8 @@ local npcColor = "FF4040"
 local squireColor = "40FF40"
 local unregisteredColor = "7B7B7B"
 local collectionIcon = "icon_item_box"
+local expireTime = 0;
+local storeTable = {};
 
 local function toIMCTemplate(text, colorHex)
     return "{ol}{ds}{#" .. colorHex .. "}".. text .. "{/}{/}{/}"    
@@ -1095,6 +1097,17 @@ end
 
 local function addIcon(text, iconName)
 	return "{img " .. iconName .. " 24 24}" .. text .. "{/}"
+end
+
+local function ITEM_TOOLTIP_STORED_TABLE(ClsName)
+	local curTime = imcTime.GetAppTime();
+	if curTime >= expireTime then
+		storeTable = {};
+		--Set new expire time as 5s after new minute
+		expireTime = 60 * math.ceil(curTime / 60) + 5;
+	else
+		return storeTable[ClsName]
+	end
 end
 
 function ITEM_TOOLTIP_BOSSCARD_HOOKED(tooltipFrame, invItem, strArg)
@@ -1655,40 +1668,49 @@ function CUSTOM_TOOLTIP_PROPS(tooltipFrame, mainFrameName, invItem, strArg, useS
     tolua.cast(leftTextCtrl, "ui::CRichText");
     
     local buffer = {};
-    local text = ""
-    
-    --Reroll Price
-    RENDER_CUBE_REROLL_PRICE(tooltipFrame, buffer, invItem);
-    
-    --Journal stats
-    local journalStatsLabel = RENDER_JOURNAL_STATS(tooltipFrame, invItem);
-    
-    --iLvl
-    local itemLevelLabel = RENDER_ITEM_LEVEL(tooltipFrame, invItem);
-    
-    --Repair Recommendation
-    local repairRecommendationLabel = RENDER_REPAIR_RECOMMENDATION(tooltipFrame, invItem);
-    
-    local headText = journalStatsLabel .. itemLevelLabel .. repairRecommendationLabel;
-    table.insert(buffer,headText);
-    
-    --Collection
-    RENDER_COLLECTION_DETAILS(tooltipFrame, buffer, invItem, text)
-      
-    --Recipe
-    RENDER_RECIPE_DETAILS(tooltipFrame, buffer, invItem, text)
-   
-    local rightText = ""
-    local rightBuffer = {}
-    --Magnum Opus
-    RENDER_MAGNUM_OPUS(tooltipFrame, rightBuffer, invItem, rightText)
-    
-    if #buffer == 1 and invItem.ItemType == "Equip" then
-        text = journalStatsLabel .. itemLevelLabel .. repairRecommendationLabel
-    else
-        text = table.concat(buffer,"{nl}")
-        rightText = table.concat(rightBuffer,"{nl}")
-    end
+	local text, rightText = "", "";
+	-- Read Stored values
+	local updating = false;
+	local tbl = ITEM_TOOLTIP_STORED_TABLE(invItem.ClassName);
+	if tbl ~= nil and false then--Stored value exists and up to date
+		text, rightText = tbl[1], tbl[2];
+	else--Run original code
+		updating = true;
+
+		--Reroll Price
+		--Possible bug due to skipping tooltipFrame
+		RENDER_CUBE_REROLL_PRICE(tooltipFrame, buffer, invItem);
+		
+		--Journal stats
+		local journalStatsLabel = RENDER_JOURNAL_STATS(tooltipFrame, invItem);
+		
+		--iLvl
+		local itemLevelLabel = RENDER_ITEM_LEVEL(tooltipFrame, invItem);
+		
+		--Repair Recommendation
+		local repairRecommendationLabel = RENDER_REPAIR_RECOMMENDATION(tooltipFrame, invItem);
+		
+		local headText = journalStatsLabel .. itemLevelLabel .. repairRecommendationLabel;
+		table.insert(buffer,headText);
+		
+		--Collection
+		RENDER_COLLECTION_DETAILS(tooltipFrame, buffer, invItem, text)
+		  
+		--Recipe
+		RENDER_RECIPE_DETAILS(tooltipFrame, buffer, invItem, text)
+	   
+		rightText = ""
+		local rightBuffer = {}
+		--Magnum Opus
+		RENDER_MAGNUM_OPUS(tooltipFrame, rightBuffer, invItem, rightText)
+		
+		if #buffer == 1 and invItem.ItemType == "Equip" then
+			text = journalStatsLabel .. itemLevelLabel .. repairRecommendationLabel
+		else
+			text = table.concat(buffer,"{nl}")
+			rightText = table.concat(rightBuffer,"{nl}")
+		end
+	end
         
     leftTextCtrl:SetText(text);
     leftTextCtrl:SetMargin(20,gBox:GetHeight() - 10,0,0)
@@ -1721,6 +1743,10 @@ function CUSTOM_TOOLTIP_PROPS(tooltipFrame, mainFrameName, invItem, strArg, useS
 	    gBox:Resize(gBox:GetWidth(), gBox:GetHeight() + leftTextCtrl:GetHeight())
     end
     
+	if updating then
+		storeTable[invItem.ClassName] = {text, rightText};
+	end
+	
     buffer = {}
     text = ""
     return leftTextCtrl:GetHeight() + leftTextCtrl:GetY();
