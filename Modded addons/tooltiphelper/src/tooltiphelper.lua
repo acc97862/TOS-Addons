@@ -1672,7 +1672,7 @@ function CUSTOM_TOOLTIP_PROPS(tooltipFrame, mainFrameName, invItem, strArg, useS
 	-- Read Stored values
 	local updating = false;
 	local tbl = ITEM_TOOLTIP_STORED_TABLE(invItem.ClassName);
-	if tbl ~= nil and false then--Stored value exists and up to date
+	if tbl ~= nil then--Stored value exists and up to date
 		text, rightText = tbl[1], tbl[2];
 	else--Run original code
 		updating = true;

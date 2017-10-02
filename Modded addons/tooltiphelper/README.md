@@ -4,4 +4,4 @@ This is a patched version of Xanaxiel's tooltip helper addon for iToS patch 1750
 
 Patch notes
 v2.1.4.2
-Patched to reduce lag when hovering over items
+Hopefully reduces lag when hovering over items
