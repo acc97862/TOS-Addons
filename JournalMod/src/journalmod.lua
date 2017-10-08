@@ -135,11 +135,19 @@ function IS_QUEST_NEED_TO_SHOW_HOOKED(frame, questCls, mapName, searchText)
 	local questname = dictionary.ReplaceDicIDInCompStr(questCls.Name);
 	questname = string.lower(questname);
 	searchText = string.lower(searchText);
-    if searchText ~= '' and string.find(questname, searchText) == nil then
-        return false;
-    end
+	if searchText == '' or string.find(questname, searchText) ~= nil then
+		return true
+	end
+	local mapname = questCls.StartMap;
+	if mapname and mapname ~= "None" then
+		mapname = GetClass("Map", mapname).Name;
+		mapname = string.lower(dictionary.ReplaceDicIDInCompStr(mapname));
+		if string.find(mapname, searchText) ~= nil then
+			return true
+		end
+	end
 
-    return true;
+	return false
 end
 
 function ADVENTURE_BOOK_QUEST_DROPLIST_INIT_HOOKED(page_quest)

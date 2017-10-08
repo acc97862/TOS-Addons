@@ -1754,8 +1754,38 @@ end
 
 
 
+local function MAGNUM_OPUS_RECIPE_LOADER()
+	local xml = require("xmlSimple").newParser();
+	local recipeXml = xml:loadFile("../addons/tooltiphelper/recipe_puzzle.xml");
+
+	if recipeXml == nil then
+		ui.SysMsg("Magnum Opus recipe file not found");
+		return
+	end
+
+	TooltipHelper.magnumOpusRecipes = {};
+	local recipes = recipeXml["Recipe_Puzzle"]:children();
+
+	for i=1,#recipes do
+		local recipe = recipes[i];
+		local targetItemClassName = recipe["@TargetItem"];
+		local ingredients = recipe:children();
+		TooltipHelper.magnumOpusRecipes[targetItemClassName] = {};
+		for j=1,#ingredients do
+			local ingredient = ingredients[j];
+			local ingredientItemClassName = ingredient["@Name"];
+			local row = ingredient["@Row"];
+			local column = ingredient["@Col"];
+			table.insert(TooltipHelper.magnumOpusRecipes[targetItemClassName], {name = ingredientItemClassName,
+			                                                                    row = tonumber(row),
+			                                                                    col = tonumber(column)});
+		end
+	end
+end
+
 function TOOLTIPHELPER_INIT()
 	if not TooltipHelper.isLoaded then
+		MAGNUM_OPUS_RECIPE_LOADER();
 		acutil.setupHook(ITEM_TOOLTIP_EQUIP_HOOKED, "ITEM_TOOLTIP_EQUIP");
 		acutil.setupHook(ITEM_TOOLTIP_ETC_HOOKED, "ITEM_TOOLTIP_ETC");
 		acutil.setupHook(ITEM_TOOLTIP_BOSSCARD_HOOKED, "ITEM_TOOLTIP_BOSSCARD");
