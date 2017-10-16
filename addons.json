@@ -3,7 +3,7 @@
 		"Name" : "Inventory Weight",
 		"File" : "inventoryweight",
 		"Extension" : "ipf",
-		"FileVersion" : "v1.0.1",
+		"FileVersion" : "v1.0.2",
 		"ReleaseTag" : "inventoryweight",
 		"Unicode" : "⛄",
 		"Description" : "Displays inventory weight",
@@ -38,16 +38,28 @@
 		]
 	},
 	{
-		"Name" : "JournalMod",
+		"Name" : "Journal Mod",
 		"File" : "journalmod",
 		"Extension" : "ipf",
-		"FileVersion" : "v1.0.0",
+		"FileVersion" : "v1.0.1",
 		"ReleaseTag" : "journalmod",
 		"Unicode" : "⛄",
 		"Description" : "Minor journal changes",
 		"Tags" : [
 			"ui",
 			"journal"
+		]
+	},
+	{
+		"Name" : "Fletcher Craft Mod",
+		"File" : "fletchercraftmod",
+		"Extension" : "ipf",
+		"FileVersion" : "v1.0.0",
+		"ReleaseTag" : "fletchercraftmod",
+		"Unicode" : "⛄",
+		"Description" : "Fletcher craft menu changes",
+		"Tags" : [
+			"ui"
 		]
 	}
 ]

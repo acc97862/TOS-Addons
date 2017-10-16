@@ -20,7 +20,11 @@ function INVENTORYWEIGHT_ON_INIT(addon, frame)
 		setupHook(INVENTORY_LIST_GET_HOOKED, "INVENTORY_LIST_GET");
 		setupHook(SET_SLOTSETTITLE_COUNT_HOOKED, "SET_SLOTSETTITLE_COUNT");
 		setupHook(INVENTORY_TOTAL_LIST_GET_HOOKED, "INVENTORY_TOTAL_LIST_GET");
-		INVENTORY_LIST_GET(ui.GetFrame("inventory"));
+
+		local inventory = ui.GetFrame("inventory");
+		inventory:GetChildRecursively("inventree_Equip"):GetChild("_SCR"):SetVisible(0);--Hides the extra scroll bar when inventory is very long
+		inventory:GetChildRecursively("inventree_ITEM"):GetChild("_SCR"):SetVisible(0);--Hides the extra scroll bar when inventory is very long
+		INVENTORY_LIST_GET(inventory);
 	end
 end
 
