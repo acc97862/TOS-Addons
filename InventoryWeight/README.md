@@ -1,3 +1,17 @@
+ADDON IS BUGGED, DO NOT USE UNTIL IT IS FIXED
+
+Bugs
+---
+Massive lag on opening cube
+
+Extra scrollbar produced
+
+
+
+
+
+
+
 Adds in inventory weight display
 
 Addon based on inventory.lua from patch 166969.ipf of iToS
