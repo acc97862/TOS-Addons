@@ -1,5 +1,6 @@
 --inventoryweight.lua
 
+local charName = "";
 local itemTbl = {};
 
 function INVENTORYWEIGHT_ON_INIT(addon, frame)
@@ -8,23 +9,21 @@ function INVENTORYWEIGHT_ON_INIT(addon, frame)
 			local storeOldFunc = hookedFunctionStr .. "_OLD";
 			if _G[storeOldFunc] == nil then
 				_G[storeOldFunc] = _G[hookedFunctionStr];
-				_G[hookedFunctionStr] = newFunction;
-			else
-				_G[hookedFunctionStr] = newFunction;
 			end
+				_G[hookedFunctionStr] = newFunction;
 		end
 
 		setupHook(INSERT_ITEM_TO_TREE_HOOKED, "INSERT_ITEM_TO_TREE");
 		setupHook(TEMP_INV_REMOVE_HOOKED, "TEMP_INV_REMOVE");
 		setupHook(INV_SLOT_UPDATE_HOOKED, "INV_SLOT_UPDATE");
-		setupHook(INVENTORY_LIST_GET_HOOKED, "INVENTORY_LIST_GET");
 		setupHook(SET_SLOTSETTITLE_COUNT_HOOKED, "SET_SLOTSETTITLE_COUNT");
 		setupHook(INVENTORY_TOTAL_LIST_GET_HOOKED, "INVENTORY_TOTAL_LIST_GET");
 
-		local inventory = ui.GetFrame("inventory");
-		inventory:GetChildRecursively("inventree_Equip"):GetChild("_SCR"):SetVisible(0);--Hides the extra scroll bar when inventory is very long
-		inventory:GetChildRecursively("inventree_ITEM"):GetChild("_SCR"):SetVisible(0);--Hides the extra scroll bar when inventory is very long
-		INVENTORY_LIST_GET(inventory);
+		local name = GET_MY_PCNAME();
+		if charName ~= name then
+			charName = name;
+			INVENTORY_LIST_GET(ui.GetFrame("inventory"));
+		end
 	end
 end
 
@@ -172,11 +171,6 @@ function INV_SLOT_UPDATE_HOOKED(frame, invItem, itemSlot)
 	end
 	local tree = GET_CHILD_RECURSIVELY(frame, 'inventree_' .. typeStr);
 	SET_SLOTSETTITLE_COUNT(tree, baseidcls, 0, invItem);
-end
-
-function INVENTORY_LIST_GET_HOOKED(frame)
-	itemTbl = {};
-	INVENTORY_LIST_GET_OLD(frame);
 end
 
 function SET_SLOTSETTITLE_COUNT_HOOKED(tree, baseidcls, addCount, invItem)
