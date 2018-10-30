@@ -1,9 +1,13 @@
 https://github.com/Excrulon/Tree-of-Savior-Addons
 
-Modified monsterframes originally by Excrulon for Tree of Savior patch 174038_001001.ipf
+Modified monsterframes originally by Excrulon for Tree of Savior patch 199407_001001.ipf
 
 Patch notes
 ---
+### v1.0.0.7
+
+Updates for iToS 24 April 2018
+
 ### v1.0.0.6
 
 Updates journal kill count every minute

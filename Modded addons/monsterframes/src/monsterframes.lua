@@ -1,12 +1,14 @@
+--monsterframes.lua
+
 local settings = {
-	showRaceType = false;
-	showAttribute = true;
-	showArmorMaterial = true;
-	showMoveType = true;
-	showEffectiveAtkType = false;
-	showTargetSize = true;
-	showMaxHp = true;
-	showKillCount = true;
+    showRaceType = false;
+    showAttribute = false;
+    showArmorMaterial = true;
+    showMoveType = true;
+    showEffectiveAtkType = false;
+    showTargetSize = true;
+    showMaxHp = true;
+    showKillCount = true;
 };
 
 function MONSTERFRAMES_ON_INIT(addon, frame)
@@ -57,17 +59,16 @@ function TGTINFO_TARGET_SET_HOOKED(frame, msg, argStr, argNum)
 		return;
 	end
 
-	-- birth buff
-	local birth_buff_skin, birth_buff_img = TARGETINFO_GET_BIRTH_SKIN_ANG_IMG(frame, targetinfo, targetHandle);
-	local birthBuffImgName = GET_BIRTH_BUFF_IMG_NAME(targetHandle);
-	if birthBuffImgName == "None" then
-		birth_buff_skin:ShowWindow(0)
-		birth_buff_img:ShowWindow(0)
-	else
-		birth_buff_skin:ShowWindow(1)
-		birth_buff_img:ShowWindow(1)
-		birth_buff_img:SetImage(birthBuffImgName)
-	end
+    -- birth buff
+    local mon_attribute_img = TARGETINFO_GET_ATTRIBUTE_SKIN_ANG_IMG(frame, targetinfo, targetHandle);
+    local attribute = targetinfo.attribute
+    local attributeImgName = "attribute_"..attribute
+    if attributeImgName == "None" then
+        mon_attribute_img:ShowWindow(0)
+    else
+        mon_attribute_img:ShowWindow(1)
+        mon_attribute_img:SetImage(attributeImgName)
+    end
 
 	if mypclevel + 10 < targetinfo.level then
 		levelcolor = frame:GetUserConfig("MON_NAME_COLOR_MORE_THAN_10");
@@ -151,16 +152,18 @@ function TGTINFO_TARGET_SET_HOOKED(frame, msg, argStr, argNum)
 		return;
 	end
 
-	local xPosition = 285;
+	local xPosition = 303;--285
 	local yPosition = 17;
 	local killxPosition = 180;
 	local propertyWidth = 35;
 	local positionIndex = 0;
 
 	if targetinfo.isElite == 1 then
-		xPosition = 195;
+		xPosition = 200;--195
 		yPosition = 13;
 		killxPosition = 55;
+	elseif info.GetMonRankbyHandle(targetHandle) == 'Special' then
+		xPosition = 260;
 	end
 
 	if settings.showRaceType then
@@ -197,8 +200,6 @@ function TGTINFO_TARGET_SET_HOOKED(frame, msg, argStr, argNum)
 		end
 	end
 
-	mytempvar = montype;
-	mytempvar2 = settings.showKillCount;
 	if settings.showKillCount then
 		local monKillCount = GetMonKillCount(pc, montype);
 		local curLv, curPoint, curMaxPoint = GET_ADVENTURE_BOOK_MONSTER_KILL_COUNT_INFO(monCls.MonRank == 'Boss', monKillCount);
@@ -267,18 +268,16 @@ function TARGETINFOTOBOSS_TARGET_SET_HOOKED(frame, msg, argStr, argNum)
 		return;
 	end
 
-	local birth_buff_skin = GET_CHILD_RECURSIVELY(frame, "birth_buff_skin");
-	local birth_buff_img = GET_CHILD_RECURSIVELY(frame, "birth_buff_img");
+    local boss_attribute_img = GET_CHILD_RECURSIVELY(frame, "boss_attribute_img");
+    local attribute = targetinfo.attribute
+    local attributeImgName = "attribute_"..attribute
 
-	local birthBuffImgName = GET_BIRTH_BUFF_IMG_NAME(session.GetTargetBossHandle());
-	if birthBuffImgName == "None" then
-		birth_buff_skin:ShowWindow(0)
-		birth_buff_img:ShowWindow(0)
-	else
-		birth_buff_skin:ShowWindow(1)
-		birth_buff_img:ShowWindow(1)
-		birth_buff_img:SetImage(birthBuffImgName)
-	end
+    if attributeImgName == "None" then
+        boss_attribute_img:ShowWindow(0)
+    else
+        boss_attribute_img:ShowWindow(1)
+        boss_attribute_img:SetImage(attributeImgName)
+    end
 
 	-- name
 	local nametext = GET_CHILD_RECURSIVELY(frame, "name", "ui::CRichText");
@@ -379,7 +378,6 @@ function TARGETINFOTOBOSS_TARGET_SET_HOOKED(frame, msg, argStr, argNum)
 	end
 
 	if settings.showKillCount then
-		mytempvar = montype;
 		local monKillCount = GetMonKillCount(pc, montype);
 		local curLv, curPoint, curMaxPoint = GET_ADVENTURE_BOOK_MONSTER_KILL_COUNT_INFO(monCls.MonRank == 'Boss', monKillCount);
 		local killCountText = frame:CreateOrGetControl("richtext", "killCountText", 0, 0, 100, 40);

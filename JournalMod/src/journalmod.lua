@@ -14,6 +14,8 @@ function JOURNALMOD_ON_INIT(addon, frame)
 		setupHook(IS_QUEST_NEED_TO_SHOW_HOOKED, "IS_QUEST_NEED_TO_SHOW");
 		setupHook(ADVENTURE_BOOK_QUEST_DROPLIST_INIT_HOOKED, "ADVENTURE_BOOK_QUEST_DROPLIST_INIT");
 		setupHook(ADVENTURE_BOOK_CHECK_STATE_FILTER_HOOKED, "ADVENTURE_BOOK_CHECK_STATE_FILTER");
+		setupHook(ADVENTURE_BOOK_QUEST_CREATE_MAP_QUEST_TREE_HOOKED, "ADVENTURE_BOOK_QUEST_CREATE_MAP_QUEST_TREE");
+		setupHook(SCR_QUEST_SHOW_ZONE_LIST_HOOKED, "SCR_QUEST_SHOW_ZONE_LIST");
 		if ADVENTURE_BOOK_CRAFT_CONTENT.SEARCH_PROP_BY_TARGET_ITEM_FUNC_OLD == nil then
 			ADVENTURE_BOOK_CRAFT_CONTENT.SEARCH_PROP_BY_TARGET_ITEM_FUNC_OLD = ADVENTURE_BOOK_CRAFT_CONTENT.SEARCH_PROP_BY_TARGET_ITEM_FUNC;
 		end
@@ -115,7 +117,7 @@ function IS_QUEST_NEED_TO_SHOW_HOOKED(frame, questCls, mapName, searchText)
 	local questLevelDrop = page_quest:GetChild('questLevelDrop');
 	tolua.cast(questLevelDrop, "ui::CDropList");
     local lvIndex = questLevelDrop:GetSelItemIndex();
-	if lvIndex ~= 0 and math.floor(questCls.Level / 100) + 1 ~= lvIndex then
+	if lvIndex ~= 0 and math.ceil(questCls.Level / 100) ~= lvIndex then
         return false;
     end
 
@@ -161,33 +163,35 @@ function ADVENTURE_BOOK_QUEST_DROPLIST_INIT_HOOKED(page_quest)
     questCateDrop:AddItem(2, ClMsg('SUB'));
     questCateDrop:AddItem(3, ClMsg('WCL_Etc'));
     
-	local levelText = GET_CHILD_RECURSIVELY(page_quest, 'levelText');
-	levelText:SetMargin(194, 25, 20, 24);
+    local levelText = GET_CHILD_RECURSIVELY(page_quest, 'levelText');
+    levelText:SetMargin(194, 25, 20, 24);
 
     local questLevelDrop = GET_CHILD_RECURSIVELY(page_quest, 'questLevelDrop');
-	questLevelDrop:SetMargin(194, 48, 178, 20);
+    questLevelDrop:SetMargin(194, 48, 178, 20);
     questLevelDrop:ClearItems();
-	questLevelDrop:AddItem(0, ClMsg('Auto_MoDu_BoKi'));
-	questLevelDrop:AddItem(1, 'Lv.1 ~ Lv.99');
-	questLevelDrop:AddItem(2, 'Lv.100 ~ Lv.199');
-	questLevelDrop:AddItem(3, 'Lv.200 ~ Lv.299');
-	questLevelDrop:AddItem(4, 'Lv.300 ~ Lv.330');
-	questLevelDrop:SetVisibleLine(5);
+    questLevelDrop:AddItem(0, ClMsg('Auto_MoDu_BoKi'));
+    questLevelDrop:AddItem(1, 'Lv.1 ~ Lv.100');
+    questLevelDrop:AddItem(2, 'Lv.101 ~ Lv.200');
+    questLevelDrop:AddItem(3, 'Lv.201 ~ Lv.300');
+	questLevelDrop:AddItem(4, 'Lv.301 ~ Lv.400');
+	questLevelDrop:AddItem(5, 'Lv.401 ~ Lv.500');
+	questLevelDrop:AddItem(6, 'Lv.501 ~ Lv.600');
+	questLevelDrop:SetVisibleLine(7);
 
-	local stateText = page_quest:CreateOrGetControl("richtext", "stateText", 378, 25, 20, 24);
-	stateText:SetText("@dicID_^*$UI_20170912_002757$*^");
-	stateText:SetFontName("black_16_b");
+    local stateText = page_quest:CreateOrGetControl("richtext", "stateText", 378, 25, 20, 24);
+    stateText:SetText("@dicID_^*$UI_20170912_002757$*^");
+    stateText:SetFontName("black_16_b");
 
-	local questStateDrop = page_quest:CreateOrGetControl("droplist", "questStateDrop", 378, 48, 178, 20);
-	tolua.cast(questStateDrop, "ui::CDropList");
-	questStateDrop:SetSkinName("droplist_normal");
-	questStateDrop:ClearItems();
-	questStateDrop:AddItem(0, ClMsg('Auto_MoDu_BoKi'), 0, 0, " ");
-	questStateDrop:AddItem(1, ClMsg('Complete'), 0, 0, " ");
-	questStateDrop:AddItem(2, ClMsg('NotComplete'), 0, 0, " ");
-	questStateDrop:SetVisibleLine(3);
-	questStateDrop:SetTextAlign("left","center");
-	questStateDrop:SetSelectedScp("ADVENTURE_BOOK_QUEST_DROPLIST");
+    local questStateDrop = page_quest:CreateOrGetControl("droplist", "questStateDrop", 378, 48, 178, 20);
+    tolua.cast(questStateDrop, "ui::CDropList");
+    questStateDrop:SetSkinName("droplist_normal");
+    questStateDrop:ClearItems();
+    questStateDrop:AddItem(0, ClMsg('Auto_MoDu_BoKi'), 0, 0, " ");
+    questStateDrop:AddItem(1, ClMsg('Complete'), 0, 0, " ");
+    questStateDrop:AddItem(2, ClMsg('NotComplete'), 0, 0, " ");
+    questStateDrop:SetVisibleLine(3);
+    questStateDrop:SetTextAlign("left","center");
+    questStateDrop:SetSelectedScp("ADVENTURE_BOOK_QUEST_DROPLIST");
 end
 
 function ADVENTURE_BOOK_CHECK_STATE_FILTER_HOOKED(frame, collectionInfo, searchText, collectionClass, collection)    
@@ -228,4 +232,71 @@ function ADVENTURE_BOOK_CHECK_STATE_FILTER_HOOKED(frame, collectionInfo, searchT
     end
 
     return true;
+end
+
+function ADVENTURE_BOOK_QUEST_CREATE_MAP_QUEST_TREE_HOOKED(questMapBox, mapCls, isSearchMode)
+    local quest_tree = questMapBox:CreateOrGetControlSet('quest_tree', 'QUEST_MAP_'..mapCls.ClassID, 0, 0);      
+    local text = quest_tree:GetChild('text');
+    text:SetText(mapCls.Name);
+    if isSearchMode == true then
+        quest_tree = AUTO_CAST(quest_tree);
+        local EXPAND_ON_IMG = quest_tree:GetUserConfig('EXPAND_ON_IMG');
+        local expandBtn = GET_CHILD(quest_tree, 'expandBtn');
+        expandBtn:SetImage(EXPAND_ON_IMG);
+		quest_tree:SetUserValue('QUEST_MAP_CLASS_NAME', mapCls.ClassName);
+		quest_tree:SetUserValue('IS_EXPAND', 1);
+    else
+        quest_tree:SetUserValue('QUEST_MAP_CLASS_NAME', mapCls.ClassName);
+    end
+    return quest_tree;
+end
+
+function SCR_QUEST_SHOW_ZONE_LIST_HOOKED(nowframe)
+    local questList, cnt = GetClassList('QuestProgressCheck');
+    local topFrame = nowframe:GetTopParentFrame();
+    local questSearchEdit = GET_CHILD_RECURSIVELY(topFrame, 'questSearchEdit');
+    local searchText = questSearchEdit:GetText();
+	local questCateDrop = GET_CHILD_RECURSIVELY(topFrame, 'questCateDrop');
+	local questLevelDrop = GET_CHILD_RECURSIVELY(topFrame, 'questLevelDrop');
+	local questStateDrop = GET_CHILD_RECURSIVELY(topFrame, 'questStateDrop');
+	local cateIndex = questCateDrop:GetSelItemIndex();
+	local lvIndex = questLevelDrop:GetSelItemIndex();
+	local stateIndex = 0;
+	if questStateDrop ~= nil then
+		tolua.cast(questStateDrop, "ui::CDropList");
+		stateIndex = questStateDrop:GetSelItemIndex();
+	end
+	local pc = GetMyPCObject();
+    local zoneList = {}
+    
+    for index = 0, cnt - 1 do
+        local questCls = GetClassByIndexFromList(questList, index);
+        if table.find(zoneList, questCls.StartMap) == 0 then
+            if questCls.Level ~= 9999 then
+                if questCls.Lvup ~= -9999 then
+                    if questCls.PeriodInitialization == 'None' then
+                        local questMode = questCls.QuestMode;
+                        if questMode ~= 'KEYITEM' and questMode ~= 'PARTY' then
+                            --local questCateDrop = GET_CHILD_RECURSIVELY(topFrame, 'questCateDrop');
+                            --local cateIndex = questCateDrop:GetSelItemIndex();
+                            if cateIndex == 0 or (cateIndex == 1 and questCls.QuestMode == 'MAIN') or (cateIndex == 2 and questCls.QuestMode == 'SUB') or (cateIndex == 3 and questCls.QuestMode ~= 'MAIN' and questCls.QuestMode ~= 'SUB') then
+                                --local questLevelDrop = GET_CHILD_RECURSIVELY(topFrame, 'questLevelDrop');
+                                --local lvIndex = questLevelDrop:GetSelItemIndex();    
+                                if lvIndex == 0 or math.ceil(questCls.Level / 100) == lvIndex then
+                                    if searchText == '' or string.find(questCls.Name, searchText) ~= nil then
+										local result = SCR_QUEST_CHECK_C(pc, questCls.ClassName);
+										if stateIndex == 0 or (stateIndex == 1 and result == 'COMPLETE') or (stateIndex == 2 and result ~= 'COMPLETE') then
+											zoneList[#zoneList + 1] = questCls.StartMap;
+										end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    return zoneList
 end

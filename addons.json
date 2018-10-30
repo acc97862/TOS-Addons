@@ -1,18 +1,5 @@
 ﻿[
 	{
-		"Name" : "Inventory Weight",
-		"File" : "inventoryweight",
-		"Extension" : "ipf",
-		"FileVersion" : "v1.0.3",
-		"ReleaseTag" : "inventoryweight",
-		"Unicode" : "⛄",
-		"Description" : "Displays inventory weight",
-		"Tags" : [
-			"ui",
-			"inventory"
-		]
-	},
-	{
 		"Name" : "Collection Search Fix",
 		"File" : "collectionsearchfix",
 		"Extension" : "ipf",
@@ -26,31 +13,6 @@
 		]
 	},
 	{
-		"Name" : "Remove Event Button",
-		"File" : "removeeventbutton",
-		"Extension" : "ipf",
-		"FileVersion" : "v1.0.1",
-		"ReleaseTag" : "removeeventbutton",
-		"Unicode" : "⛄",
-		"Description" : "Removes event button",
-		"Tags" : [
-			"ui"
-		]
-	},
-	{
-		"Name" : "Journal Mod",
-		"File" : "journalmod",
-		"Extension" : "ipf",
-		"FileVersion" : "v1.0.1",
-		"ReleaseTag" : "journalmod",
-		"Unicode" : "⛄",
-		"Description" : "Minor journal changes",
-		"Tags" : [
-			"ui",
-			"journal"
-		]
-	},
-	{
 		"Name" : "Fletcher Craft Mod",
 		"File" : "fletchercraftmod",
 		"Extension" : "ipf",
@@ -60,6 +22,45 @@
 		"Description" : "Fletcher craft menu changes",
 		"Tags" : [
 			"ui"
+		]
+	},
+	{
+		"Name" : "Gem Enchant Mod",
+		"File" : "gemenchantmod",
+		"Extension" : "ipf",
+		"FileVersion" : "v1.0.0",
+		"ReleaseTag" : "gemenchantmod",
+		"Unicode" : "⛄",
+		"Description" : "Gem enchant menu changes",
+		"Tags" : [
+			"ui",
+			"gem"
+		]
+	},
+	{
+		"Name" : "Inventory Weight",
+		"File" : "inventoryweight",
+		"Extension" : "ipf",
+		"FileVersion" : "v1.0.5",
+		"ReleaseTag" : "inventoryweight",
+		"Unicode" : "⛄",
+		"Description" : "Displays inventory weight",
+		"Tags" : [
+			"ui",
+			"inventory"
+		]
+	},
+	{
+		"Name" : "Journal Mod",
+		"File" : "journalmod",
+		"Extension" : "ipf",
+		"FileVersion" : "v1.0.3",
+		"ReleaseTag" : "journalmod",
+		"Unicode" : "⛄",
+		"Description" : "Minor journal changes",
+		"Tags" : [
+			"ui",
+			"journal"
 		]
 	}
 ]
