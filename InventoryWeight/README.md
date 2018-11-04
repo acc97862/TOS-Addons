@@ -2,13 +2,11 @@ Adds in inventory weight display
 
 Addon based on inventory.lua from patch 224611_001001.ipf of iToS
 
-
-Bugs
----
-Inventory is bugged when opening after starting up the game
-
 Patch notes
 ---
+### v1.0.6
+Fixes inventory bug when searching items and changing view options
+
 ### v1.0.5
 Updated for iToS 30 October 2018 patch 224611_001001.ipf
 
