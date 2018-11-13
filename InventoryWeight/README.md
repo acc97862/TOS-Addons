@@ -4,6 +4,9 @@ Addon based on inventory.lua from patch 224611_001001.ipf of iToS
 
 Patch notes
 ---
+### v1.0.7
+Patch to reduce crafting menu lag
+
 ### v1.0.6
 Fixes inventory bug when searching items and changing view options
 

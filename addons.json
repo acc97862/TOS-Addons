@@ -41,7 +41,7 @@
 		"Name" : "Inventory Weight",
 		"File" : "inventoryweight",
 		"Extension" : "ipf",
-		"FileVersion" : "v1.0.6",
+		"FileVersion" : "v1.0.7",
 		"ReleaseTag" : "inventoryweight",
 		"Unicode" : "⛄",
 		"Description" : "Displays inventory weight",

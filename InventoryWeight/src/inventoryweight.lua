@@ -25,6 +25,33 @@ function INVENTORYWEIGHT_ON_INIT(addon, frame)
 	end
 end
 
+local function INVENTORYWEIGHT_GET_CHANGE(invItem, addCount, tree)
+	local addWeight = 0;
+
+	if tree == nil or string.sub(tree:GetName(), -4) ~= "_All" then
+		local obj = GetIES(invItem:GetObject());
+		local ClassID = obj.ClassID;
+
+		local oldval = itemTbl[ClassID] or 0;
+		local remainInvItemCount = 0;
+
+		if obj.MaxStack == 1 then
+			remainInvItemCount = oldval + addCount;
+		elseif addCount >= 0 then
+			remainInvItemCount = GET_REMAIN_INVITEM_COUNT(invItem);
+		end
+
+		itemTbl[ClassID] = remainInvItemCount;
+		addWeight = (remainInvItemCount - oldval) * math.floor(obj.Weight * 10 + 0.5);
+		lastAddWeight = addWeight;
+	else
+		addWeight = lastAddWeight;
+		lastAddWeight = 0;
+	end
+
+	return addWeight
+end
+
 function INSERT_ITEM_TO_TREE_HOOKED(frame, tree, invItem, itemCls, baseidcls)
     --그룹 없으면 만들기
     local treegroupname = baseidcls.TreeGroup
@@ -68,7 +95,8 @@ function INSERT_ITEM_TO_TREE_HOOKED(frame, tree, invItem, itemCls, baseidcls)
     UPDATE_INVENTORY_SLOT(slot, invItem, itemCls);
 
     INV_ICON_SETINFO(frame, slot, invItem, customFunc, scriptArg, remainInvItemCount);
-	SET_SLOTSETTITLE_COUNT(tree, baseidcls, 1, invItem)
+	local addWeight = INVENTORYWEIGHT_GET_CHANGE(invItem, 1, tree);
+	SET_SLOTSETTITLE_COUNT(tree, baseidcls, 1, addWeight);
 
     slotset:MakeSelectionList();
 end
@@ -126,7 +154,8 @@ function TEMP_INV_REMOVE_HOOKED(frame, itemGuid)
         end
     end
 
-	SET_SLOTSETTITLE_COUNT(tree, baseidcls, -1, invItem);    
+	local addWeight = INVENTORYWEIGHT_GET_CHANGE(invItem, -1);
+	SET_SLOTSETTITLE_COUNT(tree, baseidcls, -1, addWeight);
 
     if cnt == 0 then
         local titleName = "ssettitle_" .. baseidcls.ClassName;
@@ -182,7 +211,7 @@ function TEMP_INV_REMOVE_HOOKED(frame, itemGuid)
         end
     end
 
-	SET_SLOTSETTITLE_COUNT(tree, baseidcls, -1, invItem);    
+	SET_SLOTSETTITLE_COUNT(tree, baseidcls, -1, addWeight);
 
     if cnt == 0 then
         local titleName = "ssettitle_" .. baseidcls.ClassName;
@@ -208,32 +237,17 @@ function TEMP_INV_REMOVE_HOOKED(frame, itemGuid)
 end
 
 function REMOVE_FROM_SLOTSET_HOOKED(slotsetname)
-
-    local tempSlotSet = {};
-    for i = 1 , #SLOTSET_NAMELIST do
-        if SLOTSET_NAMELIST[i] ~= slotsetname then
-            tempSlotSet[#tempSlotSet + 1] = SLOTSET_NAMELIST[i];
-        end
-    end
-    SLOTSET_NAMELIST = tempSlotSet;
+	REMOVE_FROM_SLOTSET_OLD(slotsetname);
 	CHECK_SLOTSET_NAMELIST[slotsetname] = nil;
-
 end
 
-function INV_SLOT_UPDATE_HOOKED(frame, invItem, itemSlot)    
-    local customFunc = nil;
-    local scriptName = frame:GetUserValue("CUSTOM_ICON_SCP");
-    local scriptArg = nil;
-    if scriptName ~= nil then
-        customFunc = _G[scriptName];
-        local getArgFunc = _G[frame:GetUserValue("CUSTOM_ICON_ARG_SCP")];
-        if getArgFunc ~= nil then
-            scriptArg = getArgFunc();            
-        end
-    end
-    
-    local remainInvItemCount = GET_REMAIN_INVITEM_COUNT(invItem);    
-    INV_ICON_SETINFO(frame, itemSlot, invItem, customFunc, scriptArg, remainInvItemCount);      
+function INV_SLOT_UPDATE_HOOKED(frame, invItem, itemSlot)
+	INV_SLOT_UPDATE_OLD(frame, invItem, itemSlot);
+
+	local addWeight = INVENTORYWEIGHT_GET_CHANGE(invItem, 0);
+	if addWeight == 0 then
+		return
+	end
 
 	local baseidcls = GET_BASEID_CLS_BY_INVINDEX(invItem.invIndex);
 	local treegroupname = baseidcls.TreeGroup;
@@ -244,55 +258,19 @@ function INV_SLOT_UPDATE_HOOKED(frame, invItem, itemSlot)
 	if tree:IsExist(treegroup) == 0 then
 		return
 	end
-	SET_SLOTSETTITLE_COUNT(tree, baseidcls, 0, invItem);
+	SET_SLOTSETTITLE_COUNT(tree, baseidcls, 0, addWeight);
 
-	typeStr = "All"
+	typeStr = "All";
 	tree = GET_CHILD_RECURSIVELY(frame, 'inventree_'..typeStr);
 	treegroup = tree:FindByValue(treegroupname);
 	if tree:IsExist(treegroup) == 0 then
 		return
 	end
-	SET_SLOTSETTITLE_COUNT(tree, baseidcls, 0, invItem);
+	SET_SLOTSETTITLE_COUNT(tree, baseidcls, 0, addWeight);
 end
 
-function SET_SLOTSETTITLE_COUNT_HOOKED(tree, baseidcls, addCount, invItem)
-	if invItem == nil then
-		SET_SLOTSETTITLE_COUNT_OLD(tree, baseidcls, addCount);
-		return
-	end
-
-	local addWeight = 0;
-
-	if string.sub(tree:GetName(), -3) == "All" then
-		addWeight = lastAddWeight;
-		lastAddWeight = 0;
-	else
-		local obj = GetIES(invItem:GetObject());
-		local ClassID = obj.ClassID;
-		local maxStack = GetClassByType("Item", invItem.type).MaxStack;
-
-		local oldval = itemTbl[ClassID];
-		if oldval == nil then
-			oldval = 0;
-		end
-
-		local remainInvItemCount = GET_REMAIN_INVITEM_COUNT(invItem);
-
-		if maxStack == 1 then
-			remainInvItemCount = oldval + addCount;
-		elseif addCount < 0 then
-			remainInvItemCount = 0;
-		end
-
-		if remainInvItemCount == 0 then
-			itemTbl[ClassID] = nil;
-		else
-			itemTbl[ClassID] = remainInvItemCount;
-		end
-
-		addWeight = (remainInvItemCount-oldval) * math.floor(obj.Weight * 10 + 0.5);
-		lastAddWeight = addWeight;
-	end
+function SET_SLOTSETTITLE_COUNT_HOOKED(tree, baseidcls, addCount, addWeight)
+	addWeight = addWeight or 0;
 
     --local clslist, cnt  = GetClassList("inven_baseid");--Unused
     local className = baseidcls.ClassName
@@ -311,7 +289,7 @@ function SET_SLOTSETTITLE_COUNT_HOOKED(tree, baseidcls, addCount, invItem)
 	curWeight = curWeight + addWeight;
     textcls:SetUserValue("TOTAL_COUNT", curCount);
 	textcls:SetUserValue("TOTAL_WEIGHT", curWeight);
-	textcls:SetText('{img btn_minus 20 20} ' .. baseidcls.TreeSSetTitle..' (' .. curCount .. ')' .. string.format(" (@dicID_^*$UI_20150317_000281$*^: %g)", curWeight/10))
+	textcls:SetText('{img btn_minus 20 20} ' .. baseidcls.TreeSSetTitle..' (' .. curCount .. ')' .. string.format(" (@dicID_^*$UI_20150317_000281$*^: %g)", curWeight/10));
 
     local hGroup = tree:FindByValue(baseidcls.TreeGroup);
     if hGroup ~= nil then
@@ -331,7 +309,7 @@ function SET_SLOTSETTITLE_COUNT_HOOKED(tree, baseidcls, addCount, invItem)
             isOptionAppliedText = ClMsg("ApplyOption")
         end
 
-		tree:SetItemCaption(hGroup,newCaption..' ('..totalCount..') '.. string.format("(@dicID_^*$UI_20150317_000281$*^: %g) ", totalWeight/10) .. isOptionAppliedText)
+		tree:SetItemCaption(hGroup,newCaption..' ('..totalCount..') '.. string.format("(@dicID_^*$UI_20150317_000281$*^: %g) ", totalWeight/10) .. isOptionAppliedText);
 
     end
 end
