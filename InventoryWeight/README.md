@@ -1,9 +1,12 @@
 Adds in inventory weight display
 
-Addon based on inventory.lua from patch 224611_001001.ipf of iToS
+Addon based on inventory.lua from patch 228503_001001.ipf of iToS
 
 Patch notes
 ---
+### v1.0.8
+Patch for 228503_001001.ipf of iToS 20 November 2018
+
 ### v1.0.7
 Patch to reduce crafting menu lag
 
