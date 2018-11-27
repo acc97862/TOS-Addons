@@ -1,6 +1,6 @@
 --inventoryweight.lua
 
-local lastAddWeight = 0;
+local addWeight = 0;
 local reuseOldWeight = false;
 local itemTbl = {};
 
@@ -25,29 +25,30 @@ function INVENTORYWEIGHT_ON_INIT(addon, frame)
 end
 
 local function INVENTORYWEIGHT_SET_CHANGE(invItem, addCount)
-	if reuseOldWeight then
-		reuseOldWeight = false;
-	else
-		if addCount == 1 then reuseOldWeight = true end
-		local obj = GetIES(invItem:GetObject());
-		local ClassID = obj.ClassID;
+	local obj = GetIES(invItem:GetObject());
+	local ClassID = obj.ClassID;
 
-		local oldval = itemTbl[ClassID] or 0;
-		local remainInvItemCount = 0;
+	local oldval = itemTbl[ClassID] or 0;
+	local remainInvItemCount = 0;
 
-		if obj.MaxStack == 1 then
-			remainInvItemCount = oldval + addCount;
-		elseif addCount >= 0 then
-			remainInvItemCount = GET_REMAIN_INVITEM_COUNT(invItem);
-		end
-
-		itemTbl[ClassID] = remainInvItemCount;
-		lastAddWeight = (remainInvItemCount - oldval) * math.floor(obj.Weight * 10 + 0.5);
+	if obj.MaxStack == 1 then
+		remainInvItemCount = oldval + addCount;
+	elseif addCount >= 0 then
+		remainInvItemCount = GET_REMAIN_INVITEM_COUNT(invItem);
 	end
+
+	itemTbl[ClassID] = remainInvItemCount;
+	addWeight = (remainInvItemCount - oldval) * math.floor(obj.Weight * 10 + 0.5);
 end
 
 function INSERT_ITEM_TO_TREE_HOOKED(frame, tree, invItem, itemCls, baseidcls)
-	INVENTORYWEIGHT_SET_CHANGE(invItem, 1);
+	if reuseOldWeight then
+		reuseOldWeight = false;
+	else
+		reuseOldWeight = (string.sub(tree:GetName(), -4) ~= "_All");
+		INVENTORYWEIGHT_SET_CHANGE(invItem, 1);
+	end
+
 	INSERT_ITEM_TO_TREE_OLD(frame, tree, invItem, itemCls, baseidcls);
 end
 
@@ -72,7 +73,7 @@ function INV_SLOT_UPDATE_HOOKED(frame, invItem, itemSlot)
 	INV_SLOT_UPDATE_OLD(frame, invItem, itemSlot);
 
 	INVENTORYWEIGHT_SET_CHANGE(invItem, 0);
-	if lastAddWeight == 0 then
+	if addWeight == 0 then
 		return
 	end
 
@@ -112,10 +113,10 @@ function SET_SLOTSETTITLE_COUNT_HOOKED(tree, baseidcls, addCount)
     local curCount = textcls:GetUserIValue("TOTAL_COUNT");
 	local curWeight = textcls:GetUserIValue("TOTAL_WEIGHT");
     curCount = curCount + addCount;
-	curWeight = curWeight + lastAddWeight;
+	curWeight = curWeight + addWeight;
     textcls:SetUserValue("TOTAL_COUNT", curCount);
 	textcls:SetUserValue("TOTAL_WEIGHT", curWeight);
-	textcls:SetText('{img btn_minus 20 20} ' .. baseidcls.TreeSSetTitle..' (' .. curCount .. ')' .. string.format(" (@dicID_^*$UI_20150317_000281$*^: %g)", curWeight/10));
+	textcls:SetText(string.format('{img btn_minus 20 20} %s (%d) (@dicID_^*$UI_20150317_000281$*^: %g)', baseidcls.TreeSSetTitle, curCount, curWeight/10));
 
     local hGroup = tree:FindByValue(baseidcls.TreeGroup);
     if hGroup ~= nil then
@@ -124,7 +125,7 @@ function SET_SLOTSETTITLE_COUNT_HOOKED(tree, baseidcls, addCount)
         local totalCount = treeNode:GetUserIValue("TOTAL_ITEM_COUNT");
 		local totalWeight = treeNode:GetUserIValue("TOTAL_ITEM_WEIGHT");
         totalCount = totalCount + addCount;     
-		totalWeight = totalWeight + lastAddWeight;
+		totalWeight = totalWeight + addWeight;
         treeNode:SetUserValue("TOTAL_ITEM_COUNT", totalCount);
 		treeNode:SetUserValue("TOTAL_ITEM_WEIGHT", totalWeight);
 
@@ -135,7 +136,7 @@ function SET_SLOTSETTITLE_COUNT_HOOKED(tree, baseidcls, addCount)
             isOptionAppliedText = ClMsg("ApplyOption")
         end
 
-		tree:SetItemCaption(hGroup,newCaption..' ('..totalCount..') '.. string.format("(@dicID_^*$UI_20150317_000281$*^: %g) ", totalWeight/10) .. isOptionAppliedText);
+		tree:SetItemCaption(hGroup,string.format("%s (%d) (@dicID_^*$UI_20150317_000281$*^: %g) %s", newCaption, totalCount, totalWeight/10, isOptionAppliedText));
 
     end
 end
@@ -152,7 +153,7 @@ function INVENTORY_TOTAL_LIST_GET_HOOKED(frame, setpos, isIgnorelifticon, invenT
         return
     end
 
-	lastAddWeight = 0;
+	addWeight = 0;
 	reuseOldWeight = false;
 	itemTbl = {};
 	INVENTORY_TOTAL_LIST_GET_OLD(frame, setpos, isIgnorelifticon, invenTypeStr);

@@ -4,6 +4,9 @@ Addon based on inventory.lua from patch 228503_001001.ipf of iToS
 
 Patch notes
 ---
+### v1.0.9
+Fixes bug when appraising equips
+
 ### v1.0.8
 Patch for 228503_001001.ipf of iToS 20 November 2018
 

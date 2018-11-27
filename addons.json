@@ -1,12 +1,12 @@
 ﻿[
 	{
-		"Name" : "Collection Search Fix",
-		"File" : "collectionsearchfix",
+		"Name" : "Collection Item Search",
+		"File" : "collectionitemsearch",
 		"Extension" : "ipf",
-		"FileVersion" : "v1.0.1",
-		"ReleaseTag" : "collectionsearchfix",
+		"FileVersion" : "v1.0.0",
+		"ReleaseTag" : "collectionitemsearch",
 		"Unicode" : "⛄",
-		"Description" : "Fixes collection frame search function",
+		"Description" : "Search for collections based on the items needed",
 		"Tags" : [
 			"ui",
 			"collection"
@@ -41,7 +41,7 @@
 		"Name" : "Inventory Weight",
 		"File" : "inventoryweight",
 		"Extension" : "ipf",
-		"FileVersion" : "v1.0.8",
+		"FileVersion" : "v1.0.9",
 		"ReleaseTag" : "inventoryweight",
 		"Unicode" : "⛄",
 		"Description" : "Displays inventory weight",
