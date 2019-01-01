@@ -13,7 +13,7 @@ Modified zoomyplus addon by FiftyCaliber with TBL code by librarianrabbit
 
 ### v1.0.6.1
 Code rewriting
-Custom keyboard lua can be edited in addon folder
+Custom keyboard lua can be edited in zoomyplus folder
 Rotating can be done while ui is still zoomed
 Control right click rotation speed can be edited in addons folder
 Fixed '/zplus reset' to reset zoom instead of '/zplus reset xy'
