@@ -1,4 +1,5 @@
 Macro bindable method to obtain precise monster stats
+
 Uses codes edited from calc_property_monster.lua
 
 Enter `/statget {stattypes}` in chat to display target stats
@@ -14,6 +15,7 @@ Patch notes
 ---
 ### v1.0.2
 Added missing line and xml changes
+
 
 ### v1.0.1
 Added block

@@ -27,4 +27,5 @@ Patch notes
 ### v1.0.1
 Addon may require map change to recover when game language is changed
 
+
 ### v1.0.0 (151622.ipf)

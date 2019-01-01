@@ -8,4 +8,5 @@ Patch notes
 ### v1.0.1
 Changed hooking method and allows variable arguments
 
+
 ### v1.0.0 (174038_001001.ipf)

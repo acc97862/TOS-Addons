@@ -1,6 +1,9 @@
 https://github.com/FiftyCaliber/ToS-Addons/tree/master/addons/zoomyplus
+
 https://github.com/Excrulon/Tree-of-Savior-Addons/tree/master/addons/zoomy/addon_d.ipf/zoomy
+
 https://github.com/librarianrabbit/tos-addons/tree/master/edited-addons/zoomyplus
+
 
 Modified zoomyplus addon by FiftyCaliber with TBL code by librarianrabbit
 
@@ -13,8 +16,13 @@ Modified zoomyplus addon by FiftyCaliber with TBL code by librarianrabbit
 
 ### v1.0.6.1
 Code rewriting
+
 Custom keyboard lua can be edited in zoomyplus folder
+
 Rotating can be done while ui is still zoomed
+
 Control right click rotation speed can be edited in addons folder
+
 Fixed '/zplus reset' to reset zoom instead of '/zplus reset xy'
+
 Fixed possible clamping bug with rotations
