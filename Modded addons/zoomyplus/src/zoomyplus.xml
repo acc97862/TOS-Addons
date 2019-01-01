@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uiframe name="zoomyplus" x="510" y="880" width="60" height="60">
+	<layer layerlevel="61"/>
+	<input hittest="true" moveintitlebar="false"/>
+	<draw drawframe="false" drawtitlebar="false"/>
+	<option visible="true" hideable="false"/>
+	<controls>
+		<richtext name="zoomyplusZText" rect="0 0 53 20" margin="0 -20 0 0" hittest="false" layout_gravity="left center" caption="{s16}{#B81313}{ol}Z : 0"/>
+		<richtext name="zoomyplusXText" rect="0 0 53 20" margin="0 0 0 0" hittest="false" layout_gravity="left center" caption="{s16}{#B81313}{ol}X : 0"/>
+		<richtext name="zoomyplusYText" rect="0 0 53 20" margin="0 20 0 0" hittest="false" layout_gravity="left center" caption="{s16}{#B81313}{ol}Y : 0"/>
+	</controls>
+</uiframe>

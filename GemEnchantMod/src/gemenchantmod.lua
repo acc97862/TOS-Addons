@@ -1,9 +1,10 @@
 --gemenchantmod.lua
 
+local hooks = {}
 local is_opened_msg_box = false
 local item_obj = nil
-local item_obj2 = nil;
-local item_slot = nil;
+local temp_item_obj = nil
+local temp_item_slot = nil
 
 local function get_exp_from_slot()
     local slots = GET_MAT_SLOT(ui.GetFrame("reinforce_by_mix"));
@@ -83,23 +84,6 @@ local function get_reinforce_slot_index(item_class_id)
         end        
     end
     return -1
-end
-
-function GEMENCHANTMOD_ON_INIT(addon, frame)
-	if OPEN_REINFORCE_BY_MIX_HOOKED ~= OPEN_REINFORCE_BY_MIX then
-		local function setupHook(newFunction, hookedFunctionStr)
-			local storeOldFunc = hookedFunctionStr .. "_OLD";
-			if _G[storeOldFunc] == nil then
-				_G[storeOldFunc] = _G[hookedFunctionStr];
-			end
-			_G[hookedFunctionStr] = newFunction;
-		end
-
-		setupHook(OPEN_REINFORCE_BY_MIX_HOOKED, "OPEN_REINFORCE_BY_MIX");
-		setupHook(DECREASE_SELECTED_ITEM_COUNT_HOOKED, "DECREASE_SELECTED_ITEM_COUNT");
-		setupHook(REMAIN_SELECTED_ITEM_COUNT_HOOKED, "REMAIN_SELECTED_ITEM_COUNT");
-		setupHook(REINFORCE_MIX_INV_RBTN_HOOKED, "REINFORCE_MIX_INV_RBTN");
-	end
 end
 
 function OPEN_REINFORCE_BY_MIX_HOOKED(frame)
@@ -195,7 +179,7 @@ function REMAIN_SELECTED_ITEM_COUNT_HOOKED(slot_index, nowselectedcount, count, 
     item_obj = nil
 end
 
-function REINFORCE_MIX_INV_RBTN_HOOKED(itemObj, slot, selectall)    
+function REINFORCE_MIX_INV_RBTN_HOOKED(itemObj, slot, selectall)
     local invitem = session.GetInvItemByGuid(GetIESID(itemObj))    
     if nil == invitem then        
         return;
@@ -220,10 +204,10 @@ function REINFORCE_MIX_INV_RBTN_HOOKED(itemObj, slot, selectall)
         end
 
 		if keyboard.IsKeyPressed("LSHIFT") == 1 then
-			local maxCnt = invitem.count;
-			item_obj2 = itemObj;
-			item_slot = slot;
-			INPUT_NUMBER_BOX(ui.GetFrame("reinforce_by_mix"), ScpArgMsg("InputCount"), "GEMENCHANTMOD_EXEC", maxCnt, 1, maxCnt, nil, nil, 1);
+			local maxCnt = invitem.count
+			temp_item_obj = itemObj
+			temp_item_slot = slot
+			INPUT_NUMBER_BOX(ui.GetFrame("reinforce_by_mix"), ScpArgMsg("InputCount"), "GEMENCHANTMOD_EXEC", maxCnt, 1, maxCnt, nil, nil, 1)
 			return
 		end
 
@@ -290,74 +274,88 @@ function REINFORCE_MIX_INV_RBTN_HOOKED(itemObj, slot, selectall)
     end 
 end
 
+function GEMENCHANTMOD_ON_INIT(addon, frame)
+	if next(hooks) == nil then
+		local function setupHook(newFunc, oldFuncStr)
+			hooks[oldFuncStr] = _G[oldFuncStr]
+			_G[oldFuncStr] = newFunc
+		end
+
+		setupHook(OPEN_REINFORCE_BY_MIX_HOOKED, "OPEN_REINFORCE_BY_MIX")
+		setupHook(DECREASE_SELECTED_ITEM_COUNT_HOOKED, "DECREASE_SELECTED_ITEM_COUNT")
+		setupHook(REMAIN_SELECTED_ITEM_COUNT_HOOKED, "REMAIN_SELECTED_ITEM_COUNT")
+		setupHook(REINFORCE_MIX_INV_RBTN_HOOKED, "REINFORCE_MIX_INV_RBTN")
+	end
+end
+
 function GEMENCHANTMOD_EXEC(frame, ret)
-	local nowselectedcount = tonumber(ret) - 1;
-	local itemObj = item_obj2;
-	local invitem = session.GetInvItemByGuid(GetIESID(itemObj));
-	local slot = item_slot;
-	item_obj2 = nil;
-	item_slot = nil;
+	local nowselectedcount = tonumber(ret) - 1
+	local itemObj = temp_item_obj
+	local invitem = session.GetInvItemByGuid(GetIESID(itemObj))
+	local slot = temp_item_slot
+	temp_item_obj = nil
+	temp_item_slot = nil
 
-	local exp = get_exp_from_slot()
-	local lv = 1
-	local tgtItem = GET_REINFORCE_MIX_ITEM()
-	local lv = GET_ITEM_LEVEL_EXP(tgtItem, exp + tgtItem.ItemExp)
-	if lv == GET_ITEM_MAX_LEVEL(tgtItem) then
-		ui.SysMsg(ClMsg("ArriveInMaxLevel"))            
-		return
-	end
-	
-	local lv, count, is_over, exceed_exp = get_item_level_exp(itemObj, tgtItem, GET_ITEM_MAX_LEVEL(tgtItem), nowselectedcount + 1, get_slot_exp_except_item(itemObj))
-	nowselectedcount = count - 1
-	
-	if is_over == true then
-		if is_opened_msg_box == false then    
-			local noScp = string.format("DECREASE_SELECTED_ITEM_COUNT(%d, %d, %d, %d, %d)", slot:GetSlotIndex(), nowselectedcount, count, invitem.count, itemObj.ClassID)
-			local yesScp = string.format("REMAIN_SELECTED_ITEM_COUNT(%d, %d, %d, %d)", slot:GetSlotIndex(), nowselectedcount, count, invitem.count)
-			item_obj = itemObj
-			ui.MsgBox(ScpArgMsg('ExceedExpOverMaxLevel{EXCEED_EXP}', "EXCEED_EXP", exceed_exp) , yesScp, noScp)
-			is_opened_msg_box = true
-		end            
-	end
-	
-	if nowselectedcount + 1 == count then
-		if count <= invitem.count then                
-			local reinfFrame = ui.GetFrame("reinforce_by_mix");
-			local icon = slot:GetIcon();            
-			if 1 == REINFORCE_BY_MIX_ADD_MATERIAL(reinfFrame, itemObj, count)  then            
-				imcSound.PlaySoundEvent("icon_get_down");
-				slot:SetUserValue("REINF_MIX_SELECTED", count);
-				local count = slot:GetUserIValue("REINF_MIX_SELECTED")                      
-				if icon ~= nil then                    
-					if count == invitem.count then                    
-						icon:SetColorTone("AA000000");
-					else
-						icon:SetColorTone("FFFFFFFF");
-					end
-				end
-			end
-		end 
-	else
-		if lv == GET_ITEM_MAX_LEVEL(tgtItem) then
-			ui.SysMsg(ClMsg("ArriveInMaxLevel"))
-			return
-		end
-
-		if nowselectedcount < invitem.count then
-			local reinfFrame = ui.GetFrame("reinforce_by_mix");
-			local icon = slot:GetIcon();            
-			if 1 == REINFORCE_BY_MIX_ADD_MATERIAL(reinfFrame, itemObj, nowselectedcount + 1)  then            
-				imcSound.PlaySoundEvent("icon_get_down");
-				slot:SetUserValue("REINF_MIX_SELECTED", nowselectedcount + 1);
-				local nowselectedcount = slot:GetUserIValue("REINF_MIX_SELECTED")                       
+    local exp = get_exp_from_slot()
+    local lv = 1
+    local tgtItem = GET_REINFORCE_MIX_ITEM()
+    local lv = GET_ITEM_LEVEL_EXP(tgtItem, exp + tgtItem.ItemExp)
+    if lv == GET_ITEM_MAX_LEVEL(tgtItem) then
+        ui.SysMsg(ClMsg("ArriveInMaxLevel"))            
+        return
+    end
+    
+    local lv, count, is_over, exceed_exp = get_item_level_exp(itemObj, tgtItem, GET_ITEM_MAX_LEVEL(tgtItem), nowselectedcount + 1, get_slot_exp_except_item(itemObj))
+    nowselectedcount = count - 1
+    
+    if is_over == true then
+        if is_opened_msg_box == false then    
+            local noScp = string.format("DECREASE_SELECTED_ITEM_COUNT(%d, %d, %d, %d, %d)", slot:GetSlotIndex(), nowselectedcount, count, invitem.count, itemObj.ClassID)
+            local yesScp = string.format("REMAIN_SELECTED_ITEM_COUNT(%d, %d, %d, %d)", slot:GetSlotIndex(), nowselectedcount, count, invitem.count)
+            item_obj = itemObj
+            ui.MsgBox(ScpArgMsg('ExceedExpOverMaxLevel{EXCEED_EXP}', "EXCEED_EXP", exceed_exp) , yesScp, noScp)
+            is_opened_msg_box = true
+        end            
+    end
+    
+    if nowselectedcount + 1 == count then
+        if count <= invitem.count then                
+            local reinfFrame = ui.GetFrame("reinforce_by_mix");
+            local icon = slot:GetIcon();            
+            if 1 == REINFORCE_BY_MIX_ADD_MATERIAL(reinfFrame, itemObj, count)  then            
+                imcSound.PlaySoundEvent("icon_get_down");
+                slot:SetUserValue("REINF_MIX_SELECTED", count);
+                local count = slot:GetUserIValue("REINF_MIX_SELECTED")                      
 				if icon ~= nil then
-					if nowselectedcount == invitem.count then                    
-						icon:SetColorTone("AA000000");
+					if count == invitem.count then
+						icon:SetColorTone("AA000000")
 					else
-						icon:SetColorTone("FFFFFFFF");
+						icon:SetColorTone("FFFFFFFF")
 					end
 				end
-			end
-		end
-	end
+            end
+        end 
+    else
+        if lv == GET_ITEM_MAX_LEVEL(tgtItem) then
+            ui.SysMsg(ClMsg("ArriveInMaxLevel"))
+            return
+        end
+
+        if nowselectedcount < invitem.count then
+            local reinfFrame = ui.GetFrame("reinforce_by_mix");
+            local icon = slot:GetIcon();            
+            if 1 == REINFORCE_BY_MIX_ADD_MATERIAL(reinfFrame, itemObj, nowselectedcount + 1)  then            
+                imcSound.PlaySoundEvent("icon_get_down");
+                slot:SetUserValue("REINF_MIX_SELECTED", nowselectedcount + 1);
+                local nowselectedcount = slot:GetUserIValue("REINF_MIX_SELECTED")                       
+				if icon ~= nil then
+					if nowselectedcount == invitem.count then
+						icon:SetColorTone("AA000000")
+					else
+						icon:SetColorTone("FFFFFFFF")
+					end
+				end
+            end
+        end
+    end
 end

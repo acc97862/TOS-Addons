@@ -1,8 +1,7 @@
 --statget.lua
---from calc_property_monster.lua
 
-local loaded = false;
-local statget = {};
+local loaded = false
+local statget = {}
 
 statget.STR = function(self)
     local statString = "STR";
@@ -293,21 +292,32 @@ end
 
 function STATGET_ON_INIT(addon,frame)
 	if not loaded then
-		local acutil = require("acutil");
-		acutil.slashCommand("/statget", STATGET);
+		loaded = true
+		local acutil = require("acutil")
+		acutil.slashCommand("/statget", STATGET)
 	end
 end
 
 function STATGET(tbl)
-	local handle = session.GetTargetHandle();
-	local npc = CreateGCIES('Monster', info.GetMonsterClassName(handle));
-	npc.Lv = info.GetLevel(handle);
+	local handle = session.GetTargetHandle()
+	local npc = CreateGCIES('Monster', info.GetMonsterClassName(handle))
+	npc.Lv = info.GetLevel(handle)
+	local targetinfo = info.GetTargetInfo(handle)
+	if targetinfo.isBoss == 1 then
+		npc.MonRank = "Boss"
+	elseif targetinfo.isElite == 1 then
+		npc.MonRank = "Elite"
+	elseif info.GetMonRankbyHandle(handle) == 'Special' then
+		npc.MonRank = "Special"
+	else
+		npc.MonRank = "Normal"
+	end
 
 	for i = 1, #tbl do
-		local stattype = string.upper(tbl[i]);
-		local fn = statget[stattype];
+		local stattype = string.upper(tbl[i])
+		local fn = statget[stattype]
 		if fn ~= nil then
-			ui.SysMsg(string.format("%s: %f", stattype, fn(npc)));
+			ui.SysMsg(string.format("%s: %f", stattype, fn(npc)))
 		end
 	end
 end

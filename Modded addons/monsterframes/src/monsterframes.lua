@@ -1,431 +1,186 @@
 --monsterframes.lua
 
+local hooks = {}
+local count = 0;
+local targetinfo = nil
+
 local settings = {
-    showRaceType = false;
-    showAttribute = false;
-    showArmorMaterial = true;
-    showMoveType = true;
-    showEffectiveAtkType = false;
-    showTargetSize = true;
-    showMaxHp = true;
-    showKillCount = true;
-};
+	showRaceType = false,
+	showAttribute = false,
+	showArmorMaterial = true,
+	showMoveType = true,
+	showEffectiveAtkType = false,
+	showTargetSize = true,
+	showMaxHp = true,
+	showKillCount = true}
+
+local posTable = {
+	normal =  {x = 303, y = 17, killx = 180, killy = 0, width = 35},
+	elite =   {x = 200, y = 13, killx =  55, killy = 0, width = 35},
+	special = {x = 260, y = 17, killx = 180, killy = 0, width = 35},
+	boss =    {x = 100, y = 25, killx =  35, killy = 5, width = 35}}
 
 function MONSTERFRAMES_ON_INIT(addon, frame)
-	if not TGTINFO_TARGET_SET_HOOKED ~= TGTINFO_TARGET_SET then
-		local acutil = require('acutil');
-		acutil.setupHook(TGTINFO_TARGET_SET_HOOKED, "TGTINFO_TARGET_SET");
-		acutil.setupHook(TARGETINFO_ON_MSG_HOOKED, "TARGETINFO_ON_MSG");
-		acutil.setupHook(TARGETINFOTOBOSS_TARGET_SET_HOOKED, "TARGETINFOTOBOSS_TARGET_SET");
-		acutil.setupHook(TARGETINFOTOBOSS_ON_MSG_HOOKED, "TARGETINFOTOBOSS_ON_MSG");
-		local t, err = acutil.loadJSON("../addons/monsterframes/settings.json");
+	count = 0
+	if next(hooks) == nil then
+		local function setupHook(newFunc, oldFuncStr)
+			hooks[oldFuncStr] = _G[oldFuncStr]
+			_G[oldFuncStr] = newFunc
+		end
+
+		setupHook(GET_COMMAED_STRING_HOOKED,"GET_COMMAED_STRING")
+		setupHook(TGTINFO_TARGET_SET_HOOKED, "TGTINFO_TARGET_SET")
+		setupHook(TARGETINFO_ON_MSG_HOOKED, "TARGETINFO_ON_MSG")
+		setupHook(TARGETINFOTOBOSS_TARGET_SET_HOOKED, "TARGETINFOTOBOSS_TARGET_SET")
+		setupHook(TARGETINFOTOBOSS_ON_MSG_HOOKED, "TARGETINFOTOBOSS_ON_MSG")
+
+		local acutil = require('acutil')
+		local t, err = acutil.loadJSON("../addons/monsterframes/settings.json")
 		if err then
-			acutil.saveJSON("../addons/monsterframes/settings.json", settings);
+			acutil.saveJSON("../addons/monsterframes/settings.json", settings)
 		else
-			settings = t;
+			settings = t
 		end
 	end
 end
 
-local function SHOW_PROPERTY_WINDOW(frame, monCls, targetInfoProperty, monsterPropertyIcon, x, y, spacingX, spacingY)
-	local propertyType = frame:CreateOrGetControl("picture", monsterPropertyIcon .. "_icon", 0, 0, 100, 40);
-	tolua.cast(propertyType, "ui::CPicture");
-	if (targetInfoProperty == nil and monsterPropertyIcon == "EffectiveAtkType") or (targetInfoProperty ~= nil) then
-		propertyType:SetGravity(ui.LEFT, ui.TOP);
-		propertyType:SetImage(GET_MON_PROPICON_BY_PROPNAME(monsterPropertyIcon, monCls));
-		propertyType:SetOffset((x + spacingX), (y - spacingY));
-		propertyType:ShowWindow(1);
+local function SHOW_PROPERTY_PIC(frame, monCls, targetInfoProperty, monsterPropertyIcon, x, y, spacingX, spacingY)
+	local propertyType = frame:CreateOrGetControl("picture", monsterPropertyIcon .. "_icon", x + spacingX, y - spacingY, 100, 40)
+	tolua.cast(propertyType, "ui::CPicture")
+	if targetInfoProperty ~= nil then
+		propertyType:SetImage(GET_MON_PROPICON_BY_PROPNAME(monsterPropertyIcon, monCls))
+		propertyType:ShowWindow(1)
+		return 1
 	else
-		propertyType:ShowWindow(0);
+		propertyType:ShowWindow(0)
+		return 0
 	end
 end
 
-function TGTINFO_TARGET_SET_HOOKED(frame, msg, argStr, argNum)
-	if argStr == "None" then
-		return;
-	end
-
-	local mypclevel = GETMYPCLEVEL();
-	local levelcolor = ""
-	local targetHandle = session.GetTargetHandle();
-	local targetinfo = info.GetTargetInfo( targetHandle );
-	if nil == targetinfo then
-		return;
-	end
-	if targetinfo.TargetWindow == 0 then
-		return;
-	end
-	if targetinfo.isBoss == 1 then
-		return;
-	end
-
-    -- birth buff
-    local mon_attribute_img = TARGETINFO_GET_ATTRIBUTE_SKIN_ANG_IMG(frame, targetinfo, targetHandle);
-    local attribute = targetinfo.attribute
-    local attributeImgName = "attribute_"..attribute
-    if attributeImgName == "None" then
-        mon_attribute_img:ShowWindow(0)
-    else
-        mon_attribute_img:ShowWindow(1)
-        mon_attribute_img:SetImage(attributeImgName)
-    end
-
-	if mypclevel + 10 < targetinfo.level then
-		levelcolor = frame:GetUserConfig("MON_NAME_COLOR_MORE_THAN_10");
-	elseif mypclevel + 5 < targetinfo.level then
-		levelcolor = frame:GetUserConfig("MON_NAME_COLOR_MORE_THAN_5");
-	end
-
-	-- gauge
-	local hpGauge = TARGETINFO_GET_HP_GAUGE(frame, targetinfo, targetHandle);
-	frame:SetValue(session.GetTargetHandle());
-
-	local stat = targetinfo.stat;
-
-	if stat.HP ~= hpGauge:GetCurPoint() or stat.maxHP ~= hpGauge:GetMaxPoint() then
-		hpGauge:SetPoint(stat.HP, stat.maxHP);
-		hpGauge:StopTimeProcess();
+local function SHOW_PROPERTY_TEXT(frame, propertyName, text, x, y, check)
+	local propertyType = frame:CreateOrGetControl("richtext", propertyName .. "Text", x, y, 100, 40)
+	tolua.cast(propertyType, "ui::CRichText")
+	if check then
+		propertyType:SetText(text)
+		propertyType:ShowWindow(1)
+		return 1
 	else
-		hpGauge:SetMaxPointWithTime(stat.HP, stat.maxHP, 0.2, 0.4);
-	end
-
-	if targetinfo.isInvincible ~= hpGauge:GetValue() then
-		hpGauge:SetValue(targetinfo.isInvincible);
-		if targetinfo.isInvincible == 1 then
-			hpGauge:SetColorTone("FF111111");
-		else
-			hpGauge:SetColorTone("FFFFFFFF");
-		end
-	end
-	local hpText = frame:GetChild('hpText');
-
-	-- Edits made here
-	if settings.showMaxHp then
-		hpText:SetText(GetCommaedText(stat.HP) .. "/" .. GetCommaedText(stat.maxHP));
-	else
-		hpText:SetText(GET_COMMAED_STRING(stat.HP));
-	end
-
-	-- name
-	local targetSize = targetinfo.size;
-	local eliteBuffMob = "";
-	if targetSize ~= nil then
-		if targetinfo.isEliteBuff == 1 then
-			eliteBuffMob = ClMsg("TargetNameElite") .. " ";
-		end
-	end
-	local nametext = GET_CHILD_RECURSIVELY(frame, "name", "ui::CRichText");
-	local mypclevel = GETMYPCLEVEL();
-	local levelColor = "";
-	if mypclevel + 10 < targetinfo.level then
-		nametext:SetTextByKey('color', frame:GetUserConfig("MON_NAME_COLOR_MORE_THAN_10"));
-	elseif mypclevel + 5 < targetinfo.level then
-		nametext:SetTextByKey('color', frame:GetUserConfig("MON_NAME_COLOR_MORE_THAN_5"));
-	else
-		nametext:SetTextByKey('color', frame:GetUserConfig("MON_NAME_COLOR_DEFAULT"));
-	end
-	nametext:SetTextByKey('lv', targetinfo.level);
-	nametext:SetTextByKey('name', eliteBuffMob..targetinfo.name);
-
-	-- race
-	local monsterRaceSet = TARGETINFO_GET_RACE_CONTROL(frame, targetinfo, targetHandle);
-	local racePic = monsterRaceSet:GetChild('racePic');
-	local raceImg = TARGETINFO_GET_RACE_TYPE_IMAGE(monsterRaceSet, targetinfo.raceType);
-	racePic = tolua.cast(racePic, 'ui::CPicture');
-	racePic:SetImage(raceImg);
-
-	if ui.IsFrameVisible("targetinfotoboss") == 1 then
-		frame:MoveFrame(TARGET_INFO_OFFSET_BOSS_X, TARGET_INFO_OFFSET_Y);
-	else
-		frame:MoveFrame(TARGET_INFO_OFFSET_X, TARGET_INFO_OFFSET_Y);
-	end
-	frame:ShowWindow(1);
-	frame:Invalidate();
-
-
-	-- Edited monsterframes code here
-	local monactor = world.GetActor(session.GetTargetHandle());
-	local montype = monactor:GetType();
-	local monCls = GetClassByType("Monster", montype);
-
-	if monCls == nil then
-		return;
-	end
-
-	local xPosition = 303;--285
-	local yPosition = 17;
-	local killxPosition = 180;
-	local propertyWidth = 35;
-	local positionIndex = 0;
-
-	if targetinfo.isElite == 1 then
-		xPosition = 200;--195
-		yPosition = 13;
-		killxPosition = 55;
-	elseif info.GetMonRankbyHandle(targetHandle) == 'Special' then
-		xPosition = 260;
-	end
-
-	if settings.showRaceType then
-		SHOW_PROPERTY_WINDOW(frame, monCls, targetinfo.raceType, "RaceType", xPosition + (positionIndex * propertyWidth), yPosition, 10, 10);
-		positionIndex = positionIndex + 1;
-	end
-	if settings.showAttribute then
-		SHOW_PROPERTY_WINDOW(frame, monCls, targetinfo.attribute, "Attribute", xPosition + (positionIndex * propertyWidth), yPosition, 10, 10);
-		positionIndex = positionIndex + 1;
-	end
-	if settings.showArmorMaterial then
-		SHOW_PROPERTY_WINDOW(frame, monCls, targetinfo.armorType, "ArmorMaterial", xPosition + (positionIndex * propertyWidth), yPosition, 10, 10);
-		positionIndex = positionIndex + 1;
-	end
-	if settings.showMoveType then
-		SHOW_PROPERTY_WINDOW(frame, monCls, monCls["MoveType"], "MoveType", xPosition + (positionIndex * propertyWidth), yPosition, 10, 10);
-		positionIndex = positionIndex + 1;
-	end
-	if settings.showEffectiveAtkType then
-		SHOW_PROPERTY_WINDOW(frame, monCls, nil, "EffectiveAtkType", xPosition + (positionIndex * propertyWidth), yPosition, 10, 10);
-		positionIndex = positionIndex + 1;
-	end
-
-	if settings.showTargetSize then
-		local targetSizeText = frame:CreateOrGetControl("richtext", "targetSizeText", 0, 0, 100, 40);
-		tolua.cast(targetSizeText, "ui::CRichText");
-		if targetinfo.size ~= nil then
-			targetSizeText:SetOffset(xPosition + (positionIndex * propertyWidth) + 10, yPosition - 8);
-			targetSizeText:SetText("{@st41}{s28}" .. targetinfo.size);
-			targetSizeText:ShowWindow(1);
-			positionIndex = positionIndex + 1;
-		else
-			targetSizeText:ShowWindow(0);
-		end
-	end
-
-	if settings.showKillCount then
-		local monKillCount = GetMonKillCount(pc, montype);
-		local curLv, curPoint, curMaxPoint = GET_ADVENTURE_BOOK_MONSTER_KILL_COUNT_INFO(monCls.MonRank == 'Boss', monKillCount);
-		local killCountText = frame:CreateOrGetControl("richtext", "killCountText", 0, 0, 100, 40);
-		if targetinfo.size ~= nil then
-			killCountText:SetOffset(killxPosition, 0);
-			killCountText:SetFontName("white_16_ol");
-			killCountText:SetText(string.format("%d: %d/%d", curLv, curPoint, curMaxPoint));
-			killCountText:ShowWindow(1);
-		else
-			killCountText:ShowWindow(0);
-		end
+		propertyType:ShowWindow(0)
+		return 0
 	end
 end
 
-function TARGETINFO_ON_MSG_HOOKED(frame, msg, argStr, argNum)
-
-	if msg == 'TARGET_CLEAR' then
-		frame:ShowWindow(0);
-	end
-
-	if msg == 'TARGET_UPDATE' then
-		local stat = info.GetStat(session.GetTargetHandle());
-		if stat == nil then
-			return;
-		end
-
-		local targetHandle = session.GetTargetHandle();
-		local targetinfo = info.GetTargetInfo(targetHandle);
-		local hpGauge = TARGETINFO_GET_HP_GAUGE(frame, targetinfo, targetHandle);
-		local beforeHP = hpGauge:GetCurPoint();
-		if beforeHP > stat.HP then
-			local damRate = (beforeHP - stat.HP) / stat.maxHP;
-			if damRate >= 0.5 then
-				UI_PLAYFORCE(frame, "gauge_damage");
-			end
-		end
-		hpGauge:SetMaxPointWithTime(stat.HP, stat.maxHP, 0.2, 0.4);
-		local hpText = frame:GetChild('hpText');
-
-		--Edits made here
-		if settings.showMaxHp then
-			hpText:SetText(GetCommaedText(stat.HP) .. "/" .. GetCommaedText(stat.maxHP));
-		else
-			hpText:SetText(GET_COMMAED_STRING(stat.HP));
-		end
-		frame:Invalidate();
-	 end
-end
-
-function TARGETINFOTOBOSS_TARGET_SET_HOOKED(frame, msg, argStr, argNum)
-	if argStr == "None" or argNum == nil then
-		return;
-	end
-
-	local targetinfo = info.GetTargetInfo(argNum);
+local function SHOW_CUSTOM_ICONS(frame, targetHandle, isBoss)
 	if targetinfo == nil then
-		session.ResetTargetBossHandle();
-		frame:ShowWindow(0);
-		return;
+		return
 	end
 
-	if 0 == targetinfo.TargetWindow or targetinfo.isBoss == 0 then
-		session.ResetTargetBossHandle();
-		frame:ShowWindow(0);
-		return;
-	end
-
-    local boss_attribute_img = GET_CHILD_RECURSIVELY(frame, "boss_attribute_img");
-    local attribute = targetinfo.attribute
-    local attributeImgName = "attribute_"..attribute
-
-    if attributeImgName == "None" then
-        boss_attribute_img:ShowWindow(0)
-    else
-        boss_attribute_img:ShowWindow(1)
-        boss_attribute_img:SetImage(attributeImgName)
-    end
-
-	-- name
-	local nametext = GET_CHILD_RECURSIVELY(frame, "name", "ui::CRichText");
-	local mypclevel = GETMYPCLEVEL();
-	local levelColor = "";
-	if mypclevel + 10 < targetinfo.level then
-		nametext:SetTextByKey('color', frame:GetUserConfig("MON_NAME_COLOR_MORE_THAN_10"));
-	elseif mypclevel + 5 < targetinfo.level then
-		nametext:SetTextByKey('color', frame:GetUserConfig("MON_NAME_COLOR_MORE_THAN_5"));
-	else
-		nametext:SetTextByKey('color', frame:GetUserConfig("MON_NAME_COLOR_DEFAULT"));
-	end
-	nametext:SetTextByKey('lv', targetinfo.level);
-	nametext:SetTextByKey('name', targetinfo.name);
-
-	-- race
-	local raceTypeSet = GET_CHILD(frame, "race");
-	local image = raceTypeSet:GetChild('racePic');
-	local imageStr = TARGETINFO_GET_RACE_TYPE_IMAGE(raceTypeSet, targetinfo.raceType);
-	image = tolua.cast(image, 'ui::CPicture');
-	image:SetImage(imageStr);
-
-	-- hp
-	local stat = targetinfo.stat;
-	local hpGauge = GET_CHILD(frame, "hp", "ui::CGauge");
-	local hpText = frame:GetChild('hpText');
-	hpGauge:SetPoint(stat.HP, stat.maxHP);
-
-	-- Edits made here
-	if settings.showMaxHp then
-		hpText:SetText(GetCommaedText(stat.HP) .. "/" .. GetCommaedText(stat.maxHP));
-	else
-		hpText:SetText(GET_COMMAED_STRING(stat.HP));
-	end
-
-	if targetinfo.isInvincible ~= hpGauge:GetValue() then
-		hpGauge:SetValue(targetinfo.isInvincible);
-		if targetinfo.isInvincible == 1 then
-			hpGauge:SetColorTone("FF111111");
-		else
-			hpGauge:SetColorTone("FFFFFFFF");
-		end
-	end
-
-	frame:ShowWindow(1);
-	frame:Invalidate();
-	frame:SetValue(argNum);	-- argNum 가 핸들임
-
-
-	-- Edited monsterframes code here
-	local monactor = world.GetActor(session.GetTargetBossHandle());
-	local montype = monactor:GetType();
-	local monCls = GetClassByType("Monster", montype);
+	local montype = world.GetActor(targetHandle):GetType()
+	local monCls = GetClassByType("Monster", montype)
 
 	if monCls == nil then
-		return;
+		return
 	end
 
-	local xPosition = 100;
-	local yPosition = 25;
-	local killxPosition = 35;
-	local killyPosition = 5;
-	local propertyWidth = 35;
-	local positionIndex = 0;
+	local pos = posTable.normal
+	if isBoss then
+		pos = posTable.boss
+	elseif targetinfo.isElite == 1 then
+		pos = posTable.elite
+	elseif info.GetMonRankbyHandle(targetHandle) == 'Special' then
+		pos = posTable.special
+	end
 
+	local positionIndex = 0
 	if settings.showRaceType then
-		SHOW_PROPERTY_WINDOW(frame, monCls, targetinfo.raceType, "RaceType", xPosition + (positionIndex * propertyWidth), yPosition, 10, 10);
-		positionIndex = positionIndex + 1;
+		positionIndex = positionIndex + SHOW_PROPERTY_PIC(frame, monCls, targetinfo.raceType, "RaceType", pos.x + (positionIndex * pos.width), pos.y, 10, 10)
 	end
 	if settings.showAttribute then
-		SHOW_PROPERTY_WINDOW(frame, monCls, targetinfo.attribute, "Attribute", xPosition + (positionIndex * propertyWidth), yPosition, 10, 10);
-		positionIndex = positionIndex + 1;
+		positionIndex = positionIndex + SHOW_PROPERTY_PIC(frame, monCls, targetinfo.attribute, "Attribute", pos.x + (positionIndex * pos.width), pos.y, 10, 10)
 	end
 	if settings.showArmorMaterial then
-		SHOW_PROPERTY_WINDOW(frame, monCls, targetinfo.armorType, "ArmorMaterial", xPosition + (positionIndex * propertyWidth), yPosition, 10, 10);
-		positionIndex = positionIndex + 1;
+		positionIndex = positionIndex + SHOW_PROPERTY_PIC(frame, monCls, targetinfo.armorType, "ArmorMaterial", pos.x + (positionIndex * pos.width), pos.y, 10, 10)
 	end
 	if settings.showMoveType then
-		SHOW_PROPERTY_WINDOW(frame, monCls, monCls["MoveType"], "MoveType", xPosition + (positionIndex * propertyWidth), yPosition, 10, 10);
-		positionIndex = positionIndex + 1;
+		positionIndex = positionIndex + SHOW_PROPERTY_PIC(frame, monCls, monCls["MoveType"], "MoveType", pos.x + (positionIndex * pos.width), pos.y, 10, 10)
 	end
 	if settings.showEffectiveAtkType then
-		SHOW_PROPERTY_WINDOW(frame, monCls, nil, "EffectiveAtkType", xPosition + (positionIndex * propertyWidth), yPosition, 10, 10);
-		positionIndex = positionIndex + 1;
+		positionIndex = positionIndex + SHOW_PROPERTY_PIC(frame, monCls, 1, "EffectiveAtkType", pos.x + (positionIndex * pos.width), pos.y, 10, 10)
 	end
 
 	if settings.showTargetSize then
-		local targetSizeText = frame:CreateOrGetControl("richtext", "targetSizeText", 0, 0, 100, 40);
-		tolua.cast(targetSizeText, "ui::CRichText");
-		if targetinfo.size ~= nil then
-			targetSizeText:SetOffset(xPosition + (positionIndex * propertyWidth) + 10, yPosition - 8);
-			targetSizeText:SetText("{@st41}{s28}" .. targetinfo.size);
-			targetSizeText:ShowWindow(1);
-			positionIndex = positionIndex + 1;
-		else
-			targetSizeText:ShowWindow(0);
-		end
+		positionIndex = positionIndex + SHOW_PROPERTY_TEXT(frame, "TargetSize", "{@st41}{s28}" .. targetinfo.size, pos.x + (positionIndex * pos.width) + 10, pos.y - 8, targetinfo.size ~= nil)
 	end
 
 	if settings.showKillCount then
-		local monKillCount = GetMonKillCount(pc, montype);
-		local curLv, curPoint, curMaxPoint = GET_ADVENTURE_BOOK_MONSTER_KILL_COUNT_INFO(monCls.MonRank == 'Boss', monKillCount);
-		local killCountText = frame:CreateOrGetControl("richtext", "killCountText", 0, 0, 100, 40);
-		if targetinfo.size ~= nil then
-			killCountText:SetOffset(killxPosition, killyPosition);
-			killCountText:SetFontName("white_16_ol");
-			killCountText:SetText(string.format("%d: %d/%d", curLv, curPoint, curMaxPoint));
-			killCountText:ShowWindow(1);
-		else
-			killCountText:ShowWindow(0);
-		end
+		local curLv, curPoint, curMaxPoint = GET_ADVENTURE_BOOK_MONSTER_KILL_COUNT_INFO(monCls.MonRank == 'Boss', GetMonKillCount(pc, montype))
+		SHOW_PROPERTY_TEXT(frame, "KillCount", string.format("{@st42}{s16}%d: %d/%d", curLv, curPoint, curMaxPoint), pos.killx, pos.killy, curMaxPoint ~= 0)
 	end
 end
 
-function TARGETINFOTOBOSS_ON_MSG_HOOKED(frame, msg, argStr, argNum)
-
-	if msg == 'TARGET_CLEAR_BOSS' then
-		session.ResetTargetBossHandle();
-		frame:SetVisible(0); -- visible값이 1이면 다른 몬스터 hp gauge offset이 옆으로 밀림.(targetinfo.lua 참조)
-		frame:ShowWindow(0);
+function GET_COMMAED_STRING_HOOKED(...)
+	local ret = hooks.GET_COMMAED_STRING(...)
+	if settings.showMaxHp and count > 0 and targetinfo ~= nil then
+		ret = ret .. "/" .. hooks.GET_COMMAED_STRING(targetinfo.stat.maxHP)
 	end
+	return ret
+end
 
-	if msg == 'TARGET_UPDATE' or msg == 'TARGET_BUFF_UPDATE' then
-		local target = session.GetTargetBossHandle();
-		if target ~= 0 then
-			if session.IsBoss( target ) == true then
-				TARGETINFOTOBOSS_TARGET_SET(frame, 'TARGET_SET_BOSS', "Enemy", target)
-			end
-		end
+function TGTINFO_TARGET_SET_HOOKED(frame, msg, argStr, argNum, ...)
+    if argStr == "None" then
+        return;
+    end
 
-		local stat = info.GetStat(session.GetTargetBossHandle());
-		if stat ~= nil then
-			local hpGauge = GET_CHILD(frame, "hp", "ui::CGauge");
-			hpGauge:SetPoint(stat.HP, stat.maxHP);
+    if IS_IN_EVENT_MAP() == true then
+        return;
+    end
 
-			local hpText = frame:GetChild('hpText');
+	local targetHandle = session.GetTargetHandle()
+	targetinfo = info.GetTargetInfo(targetHandle)
+	count = count + 1
+	local ret = hooks.TGTINFO_TARGET_SET(frame, msg, argStr, argNum, ...)
+	count = count - 1
+	SHOW_CUSTOM_ICONS(frame, targetHandle, false)
+	return ret
+end
 
-			-- Edits made here
-			if settings.showMaxHp then
-				hpText:SetText(GetCommaedText(stat.HP) .. "/" .. GetCommaedText(stat.maxHP));
-			else
-				hpText:SetText(GET_COMMAED_STRING(stat.HP));
-			end
+function TARGETINFO_ON_MSG_HOOKED(...)
+	targetinfo = info.GetTargetInfo(session.GetTargetHandle())
+	count = count + 1
+	local ret = hooks.TARGETINFO_ON_MSG(...)
+	count = count - 1
+	return ret
+end
 
-			if frame:IsVisible() == 0 then
-				frame:ShowWindow(1)
-			end
-			frame:Invalidate();
-		end
-	end
+function TARGETINFOTOBOSS_TARGET_SET_HOOKED(frame, msg, argStr, argNum, ...)
+    if argStr == "None" or argNum == nil then
+        return;
+    end
+    
+    targetinfo = info.GetTargetInfo(argNum);
+    if targetinfo == nil then
+        session.ResetTargetBossHandle();
+        frame:ShowWindow(0);
+        return;
+    end
+    
+    if 0 == targetinfo.TargetWindow or targetinfo.isBoss == 0 then
+        session.ResetTargetBossHandle();
+        frame:ShowWindow(0);
+        return;
+    end
+
+	count = count + 1
+	local ret = hooks.TARGETINFOTOBOSS_TARGET_SET(frame, msg, argStr, argNum, ...)
+	count = count - 1
+	SHOW_CUSTOM_ICONS(frame, argNum, true)
+	return ret
+end
+
+function TARGETINFOTOBOSS_ON_MSG_HOOKED(...)
+	targetinfo = info.GetTargetInfo(session.GetTargetBossHandle())
+	count = count + 1
+	local ret = hooks.TARGETINFOTOBOSS_ON_MSG(...)
+	count = count - 1
+	return ret
 end
