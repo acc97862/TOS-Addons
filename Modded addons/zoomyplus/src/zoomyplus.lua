@@ -70,7 +70,7 @@ function ZOOMYPLUS_LOADSETTINGS()
 end
 
 function ZOOMYPLUS_LOAD_KEYPRESS()
-	pcall(dofile("../addons/zoomyplus/keypress.lua"));
+	pcall(dofile, "../addons/zoomyplus/keypress.lua");
 end
 
 function ZOOMYPLUS_SAVESETTINGS()
