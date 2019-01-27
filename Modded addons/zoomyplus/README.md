@@ -14,6 +14,10 @@ Modified zoomyplus addon by FiftyCaliber with TBL code by librarianrabbit
 * '/zplus reset full' for complete reset
 
 
+### v1.0.6.2 (236227_001001.ipf)
+Bug with zooming when using rotate command
+Fixed unmovable frame error due to update
+
 ### v1.0.6.1
 Code rewriting
 

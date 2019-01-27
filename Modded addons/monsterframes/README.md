@@ -6,6 +6,10 @@ Modified monsterframes by Excrulon
 
 Patch notes
 ---
+### v1.0.0.9 (235504_001001.ipf)
+Patch for iToS 15 January 2019
+Changes for multiple return arguments
+
 ### v1.0.0.8
 Code changes and functional abstraction
 

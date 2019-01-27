@@ -12,7 +12,7 @@ _G["ZOOMYPLUS"]["settings"] = {
 };
 local settings = _G["ZOOMYPLUS"]["settings"];
 local acutil = require("acutil");
-local mapInit = 2;
+local mapInit = 0;
 local zoomyplusFrame;
 local XY_MULTIPLIER = 5;
 local currentX = 45;
@@ -41,14 +41,12 @@ end
 
 function ZOOMYPLUS_ON_INIT(addon, frame)
 	zoomyplusFrame = frame;
-	mapInit = 2;
+	mapInit = 1;
 	acutil.slashCommand("/zplus",ZOOMYPLUS_CMD);
 	ZOOMYPLUS_SET_LOCK(settings.lock, true);
 	frame:SetOffset(settings.displayX, settings.displayY);
 	frame:SetVisible(settings.display);
 	frame:RunUpdateScript("ZOOMY_KEYPRESS", 0, 0, 0, 1);
-	frame:SetEventScript(ui.LBUTTONDOWN, "ZOOMYPLUS_START_DRAG");
-	frame:SetEventScript(ui.LBUTTONUP, "ZOOMYPLUS_END_DRAG");
 	addon:RegisterMsg("FPS_UPDATE", "ZOOMYPLUS_UPDATE")
 end
 
@@ -82,9 +80,6 @@ function ZOOMYPLUS_SAVEDEFAULTS()
 	settings.defaultY = scaledown(currentY);
 	settings.defaultZoom = currentZoom;
 	ZOOMYPLUS_SAVESETTINGS();
-end
-
-function ZOOMYPLUS_START_DRAG()
 end
 
 function ZOOMYPLUS_END_DRAG()
@@ -212,6 +207,7 @@ function ZOOMYPLUS_CMD(command)
 		c = tonumber(c);
 		if b and c then
 			ZOOMY_ROTATE(b, c);
+			camera.CustomZoom(currentZoom, 0);
 		end
 		return;
 	end

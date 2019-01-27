@@ -10,9 +10,9 @@ function FLETCHERCRAFTMOD_ON_INIT(addon, frame)
 end
 
 function SET_ITEM_CRAFT_UINAME_HOOKED(uiName, ...)
-	local ret = hooks.SET_ITEM_CRAFT_UINAME(uiName, ...)
+	local ret = {hooks.SET_ITEM_CRAFT_UINAME(uiName, ...)}
 	if uiName == "itemcraft_fletching" then
 		g_craftRecipe_detail_item = "craftRecipe_detail_item"
 	end
-	return ret
+	return unpack(ret)
 end

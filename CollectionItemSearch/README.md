@@ -3,6 +3,9 @@ Based on code in collection.lua of iToS
 
 Patch notes
 ---
+### v1.0.2
+Changes for multiple return arguments
+
 ### v1.0.1
 Changed hooking method and allows variable arguments
 

@@ -39,11 +39,10 @@ function ADVENTURE_BOOK_CHECK_STATE_FILTER_HOOKED(frame, collectionInfo, searchT
     if searchText ~= nil and searchText ~= '' then
         local collectionName = ADVENTURE_BOOK_COLLECTION_REPLACE_NAME(collectionInfo.name);
         searchText = string.lower(searchText);
-        collectionName = dic.getTranslatedStr(collectionName);
-        collectionName = string.lower(collectionName)
+        collectionName = dic.getTranslatedStr(collectionName)
+        collectionName = string.lower(collectionName);
 		local desc = GET_COLLECTION_MAGIC_DESC(collectionClass.ClassID)
-		desc = dic.getTranslatedStr(desc)
-		desc = string.lower(desc)
+		desc = string.lower(dic.getTranslatedStr(desc))
 		if string.find(collectionName, searchText) == nil and string.find(desc, searchText) == nil then
 			local collectionList = session.GetMySession():GetCollection()
 			local curCount, maxCount = GET_COLLECTION_COUNT(collectionClass.ClassID, collectionList:Get(collectionClass.ClassID))
@@ -91,11 +90,7 @@ function SCR_QUEST_SHOW_ZONE_LIST_HOOKED(nowframe)
 	local questStateDrop = GET_CHILD_RECURSIVELY(topFrame, 'questStateDrop')
 	local cateIndex = questCateDrop:GetSelItemIndex()
 	local lvIndex = questLevelDrop:GetSelItemIndex()
-	local stateIndex = 0
-	if questStateDrop ~= nil then
-		tolua.cast(questStateDrop, "ui::CDropList")
-		stateIndex = questStateDrop:GetSelItemIndex()
-	end
+	local stateIndex = (questStateDrop ~= nil) and questStateDrop:GetSelItemIndex() or 0
     
     for index = 0, cnt - 1 do
         local questCls = GetClassByIndexFromList(questList, index);
@@ -165,9 +160,12 @@ function IS_QUEST_NEED_TO_SHOW_HOOKED(frame, questCls, mapName, searchText)
     if questMode == 'KEYITEM' or questMode == 'PARTY' then
         return false;
     end
+    
+    if IS_ADVENTURE_BOOK_EXCEPT_QUEST(questCls.ClassName) == 'YES' then
+        return false;
+    end
 
     local questCateDrop = GET_CHILD_RECURSIVELY(frame, 'questCateDrop');
-	tolua.cast(questCateDrop, "ui::CDropList")
     local cateIndex = questCateDrop:GetSelItemIndex();
     if cateIndex == 1 and questCls.QuestMode ~= 'MAIN' then -- main
         return false;
@@ -178,36 +176,31 @@ function IS_QUEST_NEED_TO_SHOW_HOOKED(frame, questCls, mapName, searchText)
     end
 
     local questLevelDrop = GET_CHILD_RECURSIVELY(frame, 'questLevelDrop');
-	tolua.cast(questLevelDrop, "ui::CDropList")
     local lvIndex = questLevelDrop:GetSelItemIndex();    
 	if lvIndex ~= 0 and math.ceil(questCls.Level / 100) ~= lvIndex then
         return false;
     end
 
 	local questStateDrop = GET_CHILD_RECURSIVELY(frame, 'questStateDrop')
-	tolua.cast(questStateDrop, "ui::CDropList")
 	local stateIndex = questStateDrop:GetSelItemIndex()
-	if stateIndex ~= 0 then
-		local pc = GetMyPCObject()
-		local result = SCR_QUEST_CHECK_C(pc, questCls.ClassName)
-		if stateIndex == 1 and result ~= 'COMPLETE' then
-			return false
-		elseif stateIndex == 2 and result == 'COMPLETE' then
-			return false
-		end
+	local result = SCR_QUEST_CHECK_C(GetMyPCObject(), questCls.ClassName)
+	if stateIndex == 1 and result ~= 'COMPLETE' then
+		return false
+	elseif stateIndex == 2 and result == 'COMPLETE' then
+		return false
 	end
 
-	local questname = dic.getTranslatedStr(questCls.Name)
-	questname = string.lower(questname)
+	local questname = string.lower(dic.getTranslatedStr(questCls.Name))
 	searchText = string.lower(searchText)
 	if searchText == '' or string.find(questname, searchText) ~= nil then
 		return true
 	end
+
 	local mapname = questCls.StartMap
 	if mapname and mapname ~= "None" then
-		mapname = GetClass("Map", mapname).Name
-		mapname = string.lower(dic.getTranslatedStr(mapname))
-		if string.find(mapname, searchText) ~= nil then
+		local mapnameText = GetClass("Map", mapname).Name
+		mapnameText = string.lower(dic.getTranslatedStr(mapnameText))
+		if string.find(mapnameText, searchText) ~= nil then
 			return true
 		end
 	end

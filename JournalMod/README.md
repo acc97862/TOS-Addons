@@ -7,6 +7,9 @@ Addon based on adventure_book of iToS
 
 Patch notes
 ---
+### v1.0.5 (235504_001001.ipf)
+Patch for update
+
 ### v1.0.4 (227234_001001.ipf)
 Quest searches by name now is now case insensitive
 

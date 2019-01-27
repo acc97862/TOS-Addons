@@ -1,8 +1,6 @@
 --monsterframes.lua
 
 local hooks = {}
-local count = 0;
-local targetinfo = nil
 
 local settings = {
 	showRaceType = false,
@@ -15,24 +13,21 @@ local settings = {
 	showKillCount = true}
 
 local posTable = {
-	normal =  {x = 303, y = 17, killx = 180, killy = 0, width = 35},
-	elite =   {x = 200, y = 13, killx =  55, killy = 0, width = 35},
+	normal  = {x = 303, y = 17, killx = 180, killy = 0, width = 35},
+	elite   = {x = 200, y = 13, killx =  55, killy = 0, width = 35},
 	special = {x = 260, y = 17, killx = 180, killy = 0, width = 35},
-	boss =    {x = 100, y = 25, killx =  35, killy = 5, width = 35}}
+	boss    = {x = 100, y = 25, killx =  35, killy = 5, width = 35}}
 
 function MONSTERFRAMES_ON_INIT(addon, frame)
-	count = 0
 	if next(hooks) == nil then
 		local function setupHook(newFunc, oldFuncStr)
 			hooks[oldFuncStr] = _G[oldFuncStr]
 			_G[oldFuncStr] = newFunc
 		end
 
-		setupHook(GET_COMMAED_STRING_HOOKED,"GET_COMMAED_STRING")
 		setupHook(TGTINFO_TARGET_SET_HOOKED, "TGTINFO_TARGET_SET")
-		setupHook(TARGETINFO_ON_MSG_HOOKED, "TARGETINFO_ON_MSG")
 		setupHook(TARGETINFOTOBOSS_TARGET_SET_HOOKED, "TARGETINFOTOBOSS_TARGET_SET")
-		setupHook(TARGETINFOTOBOSS_ON_MSG_HOOKED, "TARGETINFOTOBOSS_ON_MSG")
+		setupHook(TARGETINFO_TRANS_HP_VALUE_HOOKED, "TARGETINFO_TRANS_HP_VALUE")
 
 		local acutil = require('acutil')
 		local t, err = acutil.loadJSON("../addons/monsterframes/settings.json")
@@ -70,11 +65,7 @@ local function SHOW_PROPERTY_TEXT(frame, propertyName, text, x, y, check)
 	end
 end
 
-local function SHOW_CUSTOM_ICONS(frame, targetHandle, isBoss)
-	if targetinfo == nil then
-		return
-	end
-
+local function SHOW_CUSTOM_ICONS(frame, targetHandle, targetinfo)
 	local montype = world.GetActor(targetHandle):GetType()
 	local monCls = GetClassByType("Monster", montype)
 
@@ -83,7 +74,7 @@ local function SHOW_CUSTOM_ICONS(frame, targetHandle, isBoss)
 	end
 
 	local pos = posTable.normal
-	if isBoss then
+	if targetinfo.isBoss == 1 then
 		pos = posTable.boss
 	elseif targetinfo.isElite == 1 then
 		pos = posTable.elite
@@ -116,14 +107,8 @@ local function SHOW_CUSTOM_ICONS(frame, targetHandle, isBoss)
 		local curLv, curPoint, curMaxPoint = GET_ADVENTURE_BOOK_MONSTER_KILL_COUNT_INFO(monCls.MonRank == 'Boss', GetMonKillCount(pc, montype))
 		SHOW_PROPERTY_TEXT(frame, "KillCount", string.format("{@st42}{s16}%d: %d/%d", curLv, curPoint, curMaxPoint), pos.killx, pos.killy, curMaxPoint ~= 0)
 	end
-end
 
-function GET_COMMAED_STRING_HOOKED(...)
-	local ret = hooks.GET_COMMAED_STRING(...)
-	if settings.showMaxHp and count > 0 and targetinfo ~= nil then
-		ret = ret .. "/" .. hooks.GET_COMMAED_STRING(targetinfo.stat.maxHP)
-	end
-	return ret
+	frame:Invalidate()
 end
 
 function TGTINFO_TARGET_SET_HOOKED(frame, msg, argStr, argNum, ...)
@@ -135,21 +120,21 @@ function TGTINFO_TARGET_SET_HOOKED(frame, msg, argStr, argNum, ...)
         return;
     end
 
-	local targetHandle = session.GetTargetHandle()
-	targetinfo = info.GetTargetInfo(targetHandle)
-	count = count + 1
-	local ret = hooks.TGTINFO_TARGET_SET(frame, msg, argStr, argNum, ...)
-	count = count - 1
-	SHOW_CUSTOM_ICONS(frame, targetHandle, false)
-	return ret
-end
+    local targetHandle = session.GetTargetHandle();
+    local targetinfo = info.GetTargetInfo( targetHandle );
+    if nil == targetinfo then
+        return;
+    end
+    if targetinfo.TargetWindow == 0 then
+        return;
+    end
+    if targetinfo.isBoss == 1 then
+        return;
+    end
 
-function TARGETINFO_ON_MSG_HOOKED(...)
-	targetinfo = info.GetTargetInfo(session.GetTargetHandle())
-	count = count + 1
-	local ret = hooks.TARGETINFO_ON_MSG(...)
-	count = count - 1
-	return ret
+	local ret = {hooks.TGTINFO_TARGET_SET(frame, msg, argStr, argNum, ...)}
+	SHOW_CUSTOM_ICONS(frame, targetHandle, targetinfo)
+	return unpack(ret)
 end
 
 function TARGETINFOTOBOSS_TARGET_SET_HOOKED(frame, msg, argStr, argNum, ...)
@@ -157,7 +142,7 @@ function TARGETINFOTOBOSS_TARGET_SET_HOOKED(frame, msg, argStr, argNum, ...)
         return;
     end
     
-    targetinfo = info.GetTargetInfo(argNum);
+    local targetinfo = info.GetTargetInfo(argNum);
     if targetinfo == nil then
         session.ResetTargetBossHandle();
         frame:ShowWindow(0);
@@ -170,17 +155,15 @@ function TARGETINFOTOBOSS_TARGET_SET_HOOKED(frame, msg, argStr, argNum, ...)
         return;
     end
 
-	count = count + 1
-	local ret = hooks.TARGETINFOTOBOSS_TARGET_SET(frame, msg, argStr, argNum, ...)
-	count = count - 1
-	SHOW_CUSTOM_ICONS(frame, argNum, true)
-	return ret
+	local ret = {hooks.TARGETINFOTOBOSS_TARGET_SET(frame, msg, argStr, argNum, ...)}
+	SHOW_CUSTOM_ICONS(frame, argNum, targetinfo)
+	return unpack(ret)
 end
 
-function TARGETINFOTOBOSS_ON_MSG_HOOKED(...)
-	targetinfo = info.GetTargetInfo(session.GetTargetBossHandle())
-	count = count + 1
-	local ret = hooks.TARGETINFOTOBOSS_ON_MSG(...)
-	count = count - 1
+function TARGETINFO_TRANS_HP_VALUE_HOOKED(handle, hp, fontStyle, ...)
+	local ret = hooks.TARGETINFO_TRANS_HP_VALUE(handle, hp, fontStyle, ...)
+	if info.IsPercentageHP(handle) ~= true then
+		ret = ret .. "/" .. tostring(math.floor(info.GetTargetInfo(handle).stat.maxHP)):reverse():gsub("(%d%d%d)","%1,"):gsub(",(%-?)$","%1"):reverse()
+	end
 	return ret
 end

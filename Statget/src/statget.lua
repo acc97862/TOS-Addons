@@ -131,39 +131,20 @@ statget.DEF = function(self)
     
     local byLevel = lv * 1.0;
     
-    local byItem = SCR_MON_ITEM_ARMOR_CALC(self, lv);
-    local basicGradeRatio, reinforceGradeRatio = SCR_MON_ITEM_GRADE_RATE(self, lv);
-    
-    local byReinforce = 0;
-    local byTranscend = 1;
-    
-    local monStatType = TryGetProp(self, "StatType");
-    if monStatType ~= nil and monStatType ~= 'None' then
-        local cls = GetClass("Stat_Monster_Type", "type"..monStatType);
-        if cls ~= nil then
-            local reinforceValue = cls.ReinforceArmor;
-            byReinforce = SCR_MON_ITEM_REINFORCE_ARMOR_CALC(self, lv, reinforceValue, reinforceGradeRatio);
-            
-            local transcendValue = cls.TranscendArmor;
-            byTranscend = SCR_MON_ITEM_TRANSCEND_CALC(self, transcendValue);
-        end
+    local stat = TryGetProp(self, "CON");
+    if stat == nil then
+        stat = 1;
     end
     
-    byItem = math.floor(byItem * basicGradeRatio);
-    byItem = math.floor(byItem * byTranscend) + byReinforce;
+    local byStat = (stat * 2) + (math.floor(stat / 10) * (byLevel * 0.05));
     
-    local value = byLevel + byItem;
+    local byItem = SCR_MON_ITEM_ARMOR_DEF_CALC(self);
     
-    local byDEFRate = TryGetProp(self, "DEFRate")
-    if byDEFRate == nil then
-        byDEFRate = 100;
-    end
-    
-    byDEFRate = byDEFRate / 100;
+    local value = byLevel + byStat + byItem;
     
     local raceTypeRate = SCR_RACE_TYPE_RATE(self, "DEF");
     
-    value = value * (byDEFRate * raceTypeRate);
+    value = value * raceTypeRate;
     
     local byBuff = TryGetProp(self, "DEF_BM");
     if byBuff == nil then
@@ -185,7 +166,7 @@ statget.DEF = function(self)
         value = 0;
     end
     
-    return value--return math.floor(value)
+    return value--math.floor(value)
 end
 
 statget.MDEF = function(self)
@@ -201,39 +182,20 @@ statget.MDEF = function(self)
     
     local byLevel = lv * 1.0;
     
-    local byItem = SCR_MON_ITEM_ARMOR_CALC(self, lv);
-    local basicGradeRatio, reinforceGradeRatio = SCR_MON_ITEM_GRADE_RATE(self, lv);
-    
-    local byReinforce = 0;
-    local byTranscend = 1;
-    
-    local monStatType = TryGetProp(self, "StatType");
-    if monStatType ~= nil and monStatType ~= 'None' then
-        local cls = GetClass("Stat_Monster_Type", "type"..monStatType);
-        if cls ~= nil then
-            local reinforceValue = cls.ReinforceArmor;
-            byReinforce = SCR_MON_ITEM_REINFORCE_ARMOR_CALC(self, lv, reinforceValue, reinforceGradeRatio);
-            
-            local transcendValue = cls.TranscendArmor;
-            byTranscend = SCR_MON_ITEM_TRANSCEND_CALC(self, transcendValue);
-        end
+    local stat = TryGetProp(self, "CON");
+    if stat == nil then
+        stat = 1;
     end
     
-    byItem = math.floor(byItem * basicGradeRatio);
-    byItem = math.floor(byItem * byTranscend) + byReinforce;
+    local byStat = (stat * 2) + (math.floor(stat / 10) * (byLevel * 0.05));
     
-    local value = byLevel + byItem;
+    local byItem = SCR_MON_ITEM_ARMOR_MDEF_CALC(self);
     
-    local byMDEFRate = TryGetProp(self, "MDEFRate")
-    if byMDEFRate == nil then
-        byMDEFRate = 100;
-    end
-    
-    byMDEFRate = byMDEFRate / 100;
+    local value = byLevel + byStat + byItem;
     
     local raceTypeRate = SCR_RACE_TYPE_RATE(self, "MDEF");
     
-    value = value * (byMDEFRate * raceTypeRate);
+    value = value * raceTypeRate;
     
     local byBuff = TryGetProp(self, "MDEF_BM");
     if byBuff == nil then
@@ -255,46 +217,71 @@ statget.MDEF = function(self)
         value = 0;
     end
     
-    return value--return math.floor(value)
+    return value--math.floor(value)
+end
+
+statget.DR = function(self)
+    if self.HPCount > 0 then
+        return 0;
+    end
+    
+    local lv = TryGetProp(self, "Lv");
+    if lv == nil then
+        lv = 1;
+    end
+    
+    local byLevel = lv * 1.0;
+    
+    local raceTypeRate = SCR_RACE_TYPE_RATE(self, "DR");
+    
+    local value = byLevel * raceTypeRate;
+    
+    local byBuff = TryGetProp(self, "DR_BM", 0);
+    
+    local byRateBuff = TryGetProp(self, "DR_RATE_BM", 0);
+    byRateBuff = math.floor(value * byRateBuff);
+    
+    value = value + byBuff + byRateBuff;
+    
+    if value < 0 then
+        value = 0;
+    end
+    
+    return value--math.floor(value);
 end
 
 statget.BLK = function(self)
-    if self.Blockable == 0 then
+    if TryGetProp(self, "BLKABLE", 0) == 0 then
         return 0;
     end
     
     local lv = self.Lv;
-    local byLevel = lv * 0.25;
     
-    local stat = TryGetProp(self, "CON");
-    if stat == nil then
-        stat = 1;
+    local byLevel = lv * 1.0;
+    
+    local raceTypeRate = SCR_RACE_TYPE_RATE(self, "BLK");
+    
+    local value = byLevel * raceTypeRate;
+    
+    local byBuff = TryGetProp(self, "BLK_BM", 0);
+    
+    local byRateBuff = TryGetProp(self, "BLK_RATE_BM", 0);
+    byRateBuff = math.floor(value * byRateBuff);
+    
+    value = value + byBuff + byRateBuff;
+    
+    if value < 0 then
+        value = 0;
     end
     
-    local byStat = (stat * 0.5) + (math.floor(stat / 15) * 3);
-    
-    local monBlockRate = TryGetProp(self, "BlockRate");
-    if monBlockRate == nil then
-        monBlockRate = 100;
-    end
-    
-    monBlockRate = (byLevel + byStat) * (monBlockRate * 0.01);
-    
-    local byBuff = TryGetProp(self, "BLK_BM");
-    if byBuff == nil then
-        byBuff = 0;
-    end
-    
-    local value = byLevel + byStat + monBlockRate + byBuff;
-    
-    return value;
+    return value--math.floor(value);
 end
 
-function STATGET_ON_INIT(addon,frame)
+function STATGET_ON_INIT(addon, frame)
 	if not loaded then
-		loaded = true
 		local acutil = require("acutil")
 		acutil.slashCommand("/statget", STATGET)
+		loaded = true
 	end
 end
 

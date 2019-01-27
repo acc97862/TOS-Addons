@@ -14,9 +14,9 @@ end
 
 function CHECK_COLLECTION_INFO_FILTER_HOOKED(collectionInfo, searchText, collectionClass, collection, ...)
 	collcls = collectionClass
-	local ret = hooks.CHECK_COLLECTION_INFO_FILTER(collectionInfo, searchText, collectionClass, collection, ...)
+	local ret = {hooks.CHECK_COLLECTION_INFO_FILTER(collectionInfo, searchText, collectionClass, collection, ...)}
 	collcls = nil
-	return ret
+	return unpack(ret)
 end
 
 function GET_COLLECTION_MAGIC_DESC_HOOKED(...)
