@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uiframe name="skilllog" x="0" y="0" width="470" height="609">
+	<draw drawnotitlebar="false" drawtitlebar="false"/>
+	<frame fullheight="true" fasthide="true" layout_gravity="left top" open="pip" margin="-470 0 0 0"/>
+	<input maxwidth="1280" moveable="false"/>
+	<layer layerlevel="80"/>
+	<sound opensound="inven_win_open" closesound="inven_win_close"/>
+	<controls>
+		<richtext name="title" rect="0 0 400 30" margin="0 18 0 0" layout_gravity="center top" caption="{@st43}SkillLog{/}"/>
+		<groupbox name="pipwin_top" rect="0 0 470 126" margin="0 0 0 0" layout_gravity="center top" draw="true" hittestbox="false" resizebyparent="false" scrollbar="false" skin="test_frame_top"/>
+		<button name="startBtn" rect="0 0 160 50" margin="0 70 28 0" layout_gravity="right top" LBtnUpArgNum="" LBtnUpScp="SKILLLOG_STARTSTOP" MouseOffAnim="btn_mouseoff" MouseOnAnim="btn_mouseover" skin="test_red_button" oversound="button_cursor_over_2" clicksound="system_craft_potion_fail" caption="{@st41b}Start"/>
+		<button name="saveBtn" rect="0 0 160 50" margin="0 130 28 0" layout_gravity="right top" LBtnUpArgNum="" LBtnUpScp="SKILLLOG_SAVELOG" MouseOffAnim="btn_mouseoff" MouseOnAnim="btn_mouseover" skin="test_red_button" oversound="button_cursor_over_2" clicksound="system_craft_potion_fail" caption="{@st41b}Save"/>
+		<richtext name="castcount" rect="0 0 200 50" margin="30 70 0 0" caption="{@st43}Cast Count:{/}" layout_gravity="left top" textalign="left center"/>
+		<richtext name="timespent" rect="0 0 200 50" margin="30 130 0 0" caption="{@st43}Time Spent:{/}" layout_gravity="left top" textalign="left center"/>
+		<richtext name="castspersec" rect="0 0 200 50" margin="30 190 0 0" caption="{@st43}Casts per second:{/}" layout_gravity="left top" textalign="left center"/>
+		<textview name="textbox" rect="0 0 410 790" margin="30 250 0 0" layout_gravity="left top" skin="test_frame_midle" transparent="false"/>
+	</controls>
+</uiframe>
