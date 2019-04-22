@@ -7,6 +7,7 @@ Patch notes
 ---
 ### v1.0.11
 Bug fixes
+
 Inventory refresh on first load delayed to possibly avoid startup npc bug
 
 ### v1.0.10

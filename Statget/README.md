@@ -4,20 +4,21 @@ Uses codes edited from calc_property_monster.lua
 
 Enter `/statget {stattypes}` in chat to display target stats
 
-Supports STR, INT, DEX, CON, SPR, DEF, MDEF, DR and BLK
+Supports MHP, STR, INT, DEX, CON, SPR, DEF, MDEF, DR and BLK
 
 e.g.
 `/statget STR DEX DEF`
 
 
-
-Bug
----
-Does not work with elite mobs
+Note:
+Stats for elite mobs are not fully tested
 
 
 Patch notes
 ---
+### v1.0.4
+Elite mob stats
+
 ### v1.0.3 (235504_001001.ipf)
 Patch for iToS 15 January 2019 and added dodge rate
 
