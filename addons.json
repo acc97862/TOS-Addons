@@ -1,64 +1,64 @@
 ﻿[
 	{
-		"Name" : "Collection Item Search",
-		"File" : "collectionitemsearch",
-		"Extension" : "ipf",
-		"FileVersion" : "v1.0.2",
-		"ReleaseTag" : "collectionitemsearch",
-		"Unicode" : "⛄",
-		"Description" : "Search for collections based on the items needed",
-		"Tags" : [
+		"name" : "Collection Item Search",
+		"file" : "collectionitemsearch",
+		"extension" : "ipf",
+		"fileVersion" : "v1.0.2",
+		"releaseTag" : "collectionitemsearch",
+		"unicode" : "⛄",
+		"description" : "Search for collections based on the items needed",
+		"tags" : [
 			"ui",
 			"collection"
 		]
 	},
 	{
-		"Name" : "Fletcher Craft Mod",
-		"File" : "fletchercraftmod",
-		"Extension" : "ipf",
-		"FileVersion" : "v1.0.2",
-		"ReleaseTag" : "fletchercraftmod",
-		"Unicode" : "⛄",
-		"Description" : "Fletcher craft menu changes",
-		"Tags" : [
+		"name" : "Fletcher Craft Mod",
+		"file" : "fletchercraftmod",
+		"extension" : "ipf",
+		"fileVersion" : "v1.0.2",
+		"releaseTag" : "fletchercraftmod",
+		"unicode" : "⛄",
+		"description" : "Fletcher craft menu changes",
+		"tags" : [
 			"ui"
 		]
 	},
 	{
-		"Name" : "Gem Enchant Mod",
-		"File" : "gemenchantmod",
-		"Extension" : "ipf",
-		"FileVersion" : "v1.0.1",
-		"ReleaseTag" : "gemenchantmod",
-		"Unicode" : "⛄",
-		"Description" : "Gem enchant menu changes",
-		"Tags" : [
+		"name" : "Gem Enchant Mod",
+		"file" : "gemenchantmod",
+		"extension" : "ipf",
+		"fileVersion" : "v1.0.1",
+		"releaseTag" : "gemenchantmod",
+		"unicode" : "⛄",
+		"description" : "Gem enchant menu changes",
+		"tags" : [
 			"ui",
 			"gem"
 		]
 	},
 	{
-		"Name" : "Inventory Weight",
-		"File" : "inventoryweight",
-		"Extension" : "ipf",
-		"FileVersion" : "v1.0.11",
-		"ReleaseTag" : "inventoryweight",
-		"Unicode" : "⛄",
-		"Description" : "Displays inventory weight",
-		"Tags" : [
+		"name" : "Inventory Weight",
+		"file" : "inventoryweight",
+		"extension" : "ipf",
+		"fileVersion" : "v1.0.11",
+		"releaseTag" : "inventoryweight",
+		"unicode" : "⛄",
+		"description" : "Displays inventory weight",
+		"tags" : [
 			"ui",
 			"inventory"
 		]
 	},
 	{
-		"Name" : "Journal Mod",
-		"File" : "journalmod",
-		"Extension" : "ipf",
-		"FileVersion" : "v1.0.5",
-		"ReleaseTag" : "journalmod",
-		"Unicode" : "⛄",
-		"Description" : "Minor journal changes",
-		"Tags" : [
+		"name" : "Journal Mod",
+		"file" : "journalmod",
+		"extension" : "ipf",
+		"fileVersion" : "v1.0.5",
+		"releaseTag" : "journalmod",
+		"unicode" : "⛄",
+		"description" : "Minor journal changes",
+		"tags" : [
 			"ui",
 			"journal",
 			"adventure book"
