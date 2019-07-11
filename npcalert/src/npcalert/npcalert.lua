@@ -1,24 +1,39 @@
 --npcalert.lua
 
+local acutil = require("acutil")
 local loaded = false
 local months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
 local alarm = 0
 local logging = false
 local tracking = false
 local initObj = {}
+local mapname = ""
+local settings = {showName = true, showClassName = true, showClassID = true}
 
 local function NPCALERT_GET_TIME()
 	local curTime = geTime.GetServerSystemTime()
-	return string.format("%02d %s %04d, %02d:%02d:%02d", curTime.wDay, months[curTime.wMonth], curTime.wYear, curTime.wHour, curTime.wMinute, curTime.wSecond)
+	return string.format("%02d %s %04d\t%02d:%02d:%02d", curTime.wDay, months[curTime.wMonth], curTime.wYear, curTime.wHour, curTime.wMinute, curTime.wSecond)
 end
 
 local function NPCALERT_SAVE_TEXT(txt)
 	if txt ~= "" then
-		local file = io.open("../addons/npcalert.txt", "a")
+		local file = io.open("../addons/npcalert/logs.txt", "a")
 		file:write(txt .. "\n")
 		file:flush()
 		file:close()
 	end
+end
+
+local function NPC_ALERT_CREATE_TEXTBOX(frame, idx, maxX, height, show, text)
+	if show then
+		local textbox = frame:CreateOrGetControl("richtext", "textbox" .. idx, 0, height, 220, 40)
+		textbox:SetGravity(ui.CENTER_HORZ, ui.TOP)
+		textbox:SetText("{s16}{#B81313}{ol}" .. text)
+		idx = idx + 1
+		maxX = math.max(maxX, textbox:GetWidth())
+		height = height + textbox:GetHeight()
+	end
+	return idx, maxX, height
 end
 
 local function NPCALERT_CREATE_TRACKING_FRAME(handle)
@@ -29,8 +44,13 @@ local function NPCALERT_CREATE_TRACKING_FRAME(handle)
 			return
 		end
 	end
+	local idx, maxX, height = 1, 120, 120
+	idx, maxX, height = NPC_ALERT_CREATE_TEXTBOX(frame, idx, maxX, height, settings.showName, initObj[handle][3])
+	idx, maxX, height = NPC_ALERT_CREATE_TEXTBOX(frame, idx, maxX, height, settings.showClassName, initObj[handle][2])
+	idx, maxX, height = NPC_ALERT_CREATE_TEXTBOX(frame, idx, maxX, height, settings.showClassID, initObj[handle][1])
+	frame:Resize(maxX, height)
+	FRAME_AUTO_POS_TO_OBJ(frame, handle, -maxX / 2, -60, 3, 1)
 	frame:SetVisible(1)
-	FRAME_AUTO_POS_TO_OBJ(frame, handle, -60, 60, 3, 1)
 end
 
 local function NPCALERT_START(btn)
@@ -44,7 +64,7 @@ local function NPCALERT_START(btn)
 			if faction ~= "Monster" and actor:GetObjType() ~= GT_ITEM and faction ~= "Pet" and faction ~= "Summon" and faction ~= "RootCrystal" then
 				local obj = GetBaseObjectIES(objList[i])
 				if obj.ClassName ~= "PC" then
-					initObj[actor:GetHandleVal()] = {obj.ClassID, obj.ClassName}
+					initObj[actor:GetHandleVal()] = {obj.ClassID, obj.ClassName, obj.Name}
 				end
 			end
 		end
@@ -72,11 +92,11 @@ function NPCALERT_LOG_TOGGLE(ctrl, btn, argStr, argNum)
 	if logging then
 		logging = false
 		NPCALERT_STOP(btn)
-		NPCALERT_SAVE_TEXT(NPCALERT_GET_TIME() .. " Stopped logging\n")
+		NPCALERT_SAVE_TEXT(NPCALERT_GET_TIME() .. "\tStopped logging\n")
 	else
 		NPCALERT_START(btn)
 		logging = true
-		NPCALERT_SAVE_TEXT(NPCALERT_GET_TIME() .. " Started logging")
+		NPCALERT_SAVE_TEXT(NPCALERT_GET_TIME() .. "\tStarted logging")
 	end
 end
 
@@ -100,10 +120,26 @@ function NPCALERT_TRACK_TOGGLE(ctrl, btn, argStr, argNum)
 end
 
 function NPCALERT_READ_BTN()
-	local file = io.open("../addons/npcalert.txt", "r")
-	local content = file:read("*a")
+	local file = io.open("../addons/npcalert/logs.txt", "r")
+	local data = file:read("*a")
 	file:close()
-	CHAT_SYSTEM(string.gsub(content, "\n", "{nl}"))
+	CHAT_SYSTEM(data:gsub("\n", "{nl}"):gsub("\t", " "))
+end
+
+function NPCALERT_CHAT_MAP(cmds)
+	local map = table.remove(cmds, 1)
+	local x = table.remove(cmds, 1)
+	local z = table.remove(cmds, 1)
+	local str = MAKE_LINK_MAP_TEXT(map, x, z)
+	if #cmds == 0 then
+		CHAT_SYSTEM(str)
+	else
+		if cmds[1] == "/s" then
+			table.remove(cmds, 1)
+		end
+		cmds[#cmds+1] = str
+		ui.Chat(table.concat(cmds, " "))
+	end
 end
 
 function NPCALERT_TOGGLE_FRAME()
@@ -113,18 +149,25 @@ end
 function NPCALERT_ON_INIT(addon,frame)
 	if not loaded then
 		loaded = true
-		local acutil = require("acutil")
 		acutil.addSysIcon("npcalert", "sysmenu_mac", "NpcAlert", "NPCALERT_TOGGLE_FRAME")
+		local t, err = acutil.loadJSON("../addons/npcalert/settings.json")
+		if err then
+			acutil.saveJSON("../addons/npcalert/settings.json", settings)
+		else
+			settings = t
+		end
 	end
-	addon:RegisterMsg("FPS_UPDATE", "NPCALERT_UPDATE")
 	initObj = {}
 	alarm = 0
+	mapname = session.GetMapName()
+	acutil.slashCommand("/npcalert", NPCALERT_CHAT_MAP)
+	addon:RegisterMsg("FPS_UPDATE", "NPCALERT_UPDATE")
 	if tracking then
 		frame:GetChild("tracking"):SetText("{@st41b}Stop tracking")
 	end
 	if logging then
 		logging = false
-		NPCALERT_SAVE_TEXT(NPCALERT_GET_TIME() .. " Switched map\n")
+		NPCALERT_SAVE_TEXT(NPCALERT_GET_TIME() .. "\tSwitched map\n")
 	end
 end
 
@@ -148,12 +191,13 @@ function NPCALERT_UPDATE()
 			elseif faction ~= "Monster" and actor:GetObjType() ~= GT_ITEM and faction ~= "Pet" and faction ~= "Summon" and faction ~= "RootCrystal" then
 				local obj = GetBaseObjectIES(objList[i])
 				if obj.ClassName ~= "PC" then
-					initObj[handle] = {obj.ClassID, obj.ClassName}
+					initObj[handle] = {obj.ClassID, obj.ClassName, obj.Name}
 					if alarm == 1 then
 						alarm = 2
 					end
 					if logging then
-						txtTbl[#txtTbl + 1] = string.format("%s %6s %s appeared", timeStr, obj.ClassID, obj.ClassName)
+						local pos = actor:GetPos()
+						txtTbl[#txtTbl + 1] = string.format("%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d", timeStr, 'Appeared', obj.ClassID, obj.ClassName, mapname, pos.x, pos.y, pos.z)
 					end
 					if tracking then
 						NPCALERT_CREATE_TRACKING_FRAME(handle)
@@ -164,7 +208,7 @@ function NPCALERT_UPDATE()
 
 		for handle in pairs(removeTbl) do
 			if logging then
-				txtTbl[#txtTbl + 1] = string.format("%s %6s %s disappeared", timeStr, initObj[handle][1], initObj[handle][2])
+				txtTbl[#txtTbl + 1] = string.format("%s\t%s\t%s\t%s\t%s", timeStr, 'Disappeared', initObj[handle][1], initObj[handle][2], mapname)
 			end
 			initObj[handle] = nil
 		end

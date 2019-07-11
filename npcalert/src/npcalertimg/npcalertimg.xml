@@ -5,6 +5,6 @@
 	<option hideable="false"/>
 	<layer layerlevel="10"/>
 	<controls>
-		<picture name="circle" rect="0 0 120 120" margin="0 0 0 0" layout_gravity="center center" hittest="false" image="questmap" stretch="true"/>
+		<picture name="circle" rect="0 0 120 120" margin="0 0 0 0" layout_gravity="center top" hittest="false" image="questmap" stretch="true"/>
 	</controls>
 </uiframe>

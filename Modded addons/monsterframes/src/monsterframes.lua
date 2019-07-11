@@ -10,6 +10,7 @@ local settings = {
 	showEffectiveAtkType = false,
 	showTargetSize = true,
 	showMaxHp = true,
+	showHpPercent = true,
 	showKillCount = true}
 
 local posTable = {
@@ -163,7 +164,13 @@ end
 function TARGETINFO_TRANS_HP_VALUE_HOOKED(handle, hp, fontStyle, ...)
 	local ret = hooks.TARGETINFO_TRANS_HP_VALUE(handle, hp, fontStyle, ...)
 	if info.IsPercentageHP(handle) ~= true then
-		ret = ret .. "/" .. tostring(math.floor(info.GetTargetInfo(handle).stat.maxHP)):reverse():gsub("(%d%d%d)","%1,"):gsub(",(%-?)$","%1"):reverse()
+		local stat = info.GetTargetInfo(handle).stat
+		if settings.showMaxHp then
+			ret = ret .. "/" .. tostring(math.floor(stat.maxHP)):reverse():gsub("(%d%d%d)","%1,"):gsub(",(%-?)$","%1"):reverse()
+		end
+		if settings.showHpPercent then
+			ret = ret .. "(" .. (math.floor(stat.HP/stat.maxHP*100)) .. "%)"
+		end
 	end
 	return ret
 end
