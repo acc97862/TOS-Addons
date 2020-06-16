@@ -13,18 +13,6 @@
 		]
 	},
 	{
-		"name" : "Fletcher Craft Mod",
-		"file" : "fletchercraftmod",
-		"extension" : "ipf",
-		"fileVersion" : "v1.0.2",
-		"releaseTag" : "fletchercraftmod",
-		"unicode" : "⛄",
-		"description" : "Fletcher craft menu changes",
-		"tags" : [
-			"ui"
-		]
-	},
-	{
 		"name" : "Gem Enchant Mod",
 		"file" : "gemenchantmod",
 		"extension" : "ipf",
@@ -41,7 +29,7 @@
 		"name" : "Inventory Weight",
 		"file" : "inventoryweight",
 		"extension" : "ipf",
-		"fileVersion" : "v1.0.11",
+		"fileVersion" : "v1.0.12",
 		"releaseTag" : "inventoryweight",
 		"unicode" : "⛄",
 		"description" : "Displays inventory weight",

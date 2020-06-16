@@ -5,6 +5,9 @@ Addon based on inventory.lua of iToS
 
 Patch notes
 ---
+### v1.0.12 (289467_001001.ipf)
+Patch for 289467_001001.ipf of iToS (10 June 2020)
+
 ### v1.0.11
 Bug fixes
 
